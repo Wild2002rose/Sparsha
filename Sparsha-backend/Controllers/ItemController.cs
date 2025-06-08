@@ -11,9 +11,11 @@ namespace Sparsha_backend.Controllers
     public class ItemController : ControllerBase
     {
         private readonly ItemDbContext _itemDbContext;
-        public ItemController(ItemDbContext itemDbContext)
+        private readonly MailService _mailService;
+        public ItemController(ItemDbContext itemDbContext, MailService mailService)
         {
             _itemDbContext = itemDbContext;
+            _mailService = mailService;
         }
 
 
@@ -254,6 +256,70 @@ namespace Sparsha_backend.Controllers
             _itemDbContext.CartItems.Remove(cartItem);
             await _itemDbContext.SaveChangesAsync();
             return Ok("Items removed from wishlist");
+        }
+
+        [HttpPost("Place-Order")]
+        public async Task<IActionResult> PlaceOrder([FromBody] PlaceOrderDto dto)
+        {
+            var cart = await _itemDbContext.Carts
+                .Include(c => c.Items)
+                .ThenInclude(ci => ci.Item)
+                .FirstOrDefaultAsync( c => c.UserId == dto.UserId);
+            if (cart == null || !cart.Items.Any())
+            {
+                return BadRequest("Your cart is empty.");
+            }
+            var order = new Order
+            {
+                UserId = dto.UserId,
+                OrderDate = DateTime.UtcNow,
+                PaymentMethod = dto.PaymentMethod,
+                Address = dto.Address,
+                OrderItems = new List<OrderItem>()
+            };
+            foreach (var cartItem in cart.Items)
+            {
+                var orderItem = new OrderItem
+                {
+                    ItemId = cartItem.ItemId,
+                    Quantity = cartItem.Quantity,
+                    Price = cartItem.Item.Price
+                };
+                order.OrderItems.Add(orderItem);
+            }
+            _itemDbContext.Orders.Add(order);
+            _itemDbContext.CartItems.RemoveRange(cart.Items);
+            await _itemDbContext.SaveChangesAsync();
+            return Ok(new { message = "Order placed successfully" });
+        }
+
+        [HttpPost("Send-code")]
+        public async Task<IActionResult> SendCode([FromBody] CodeRequest request)
+        {
+            var seller = await _itemDbContext.Sellers.FirstOrDefaultAsync(s => s.SellerId == request.UserId);
+            if(seller == null || string.IsNullOrEmpty(seller.Email))
+            {
+                return BadRequest("Seller not found or email is missing");
+            }
+            var code = _mailService.GenerateVerificationCode();
+
+            bool result = await _mailService.SendCode(seller.Email, seller.Name, code);
+            if (!result)
+            {
+                return StatusCode(500, "Failed to send verification email.");
+            }
+            return Ok(new { message = "Verification code sent to email" });
+        }
+
+        [HttpPost("verify-code")]
+        public IActionResult verifyCode([FromBody] CodeVerify request)
+        {
+            if (string.IsNullOrEmpty(request.Email))
+                return BadRequest("Email is required");
+            if (_mailService.VerifyCode(request.Email, request.Code))
+                return Ok(new { message = "Verification successful!" });
+
+            return BadRequest(new { message = "Invalid or expired code." });
         }
 
     }

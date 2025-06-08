@@ -3,6 +3,7 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Sparsha_backend.Data;
 
@@ -11,9 +12,11 @@ using Sparsha_backend.Data;
 namespace Sparsha_backend.Migrations
 {
     [DbContext(typeof(ItemDbContext))]
-    partial class ItemDbContextModelSnapshot : ModelSnapshot
+    [Migration("20250608194654_fifteen")]
+    partial class fifteen
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -85,68 +88,6 @@ namespace Sparsha_backend.Migrations
                     b.HasKey("Id");
 
                     b.ToTable("Categories");
-                });
-
-            modelBuilder.Entity("Sparsha_backend.Models.Client", b =>
-                {
-                    b.Property<string>("ClientId")
-                        .HasColumnType("nvarchar(450)");
-
-                    b.Property<string>("Address")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<string>("Email")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<string>("MobileNumber")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<string>("Name")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<string>("Password")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<string>("Pincode")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.HasKey("ClientId");
-
-                    b.ToTable("Clients");
-                });
-
-            modelBuilder.Entity("Sparsha_backend.Models.ClientLoginLog", b =>
-                {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
-
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
-
-                    b.Property<string>("ClientId")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<string>("IpAddress")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<string>("Status")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<DateTime>("Timestamp")
-                        .HasColumnType("datetime2");
-
-                    b.HasKey("Id");
-
-                    b.ToTable("LoggedClients");
                 });
 
             modelBuilder.Entity("Sparsha_backend.Models.ItemOfSellers", b =>
@@ -253,8 +194,11 @@ namespace Sparsha_backend.Migrations
 
             modelBuilder.Entity("Sparsha_backend.Models.Member", b =>
                 {
-                    b.Property<string>("UserId")
-                        .HasColumnType("nvarchar(450)");
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
 
                     b.Property<string>("Address")
                         .IsRequired()
@@ -264,11 +208,15 @@ namespace Sparsha_backend.Migrations
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
-                    b.Property<string>("MobileNumber")
+                    b.Property<string>("FirstName")
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
-                    b.Property<string>("Name")
+                    b.Property<string>("LastName")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("MobileNumber")
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
@@ -276,15 +224,7 @@ namespace Sparsha_backend.Migrations
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
-                    b.Property<string>("PinCode")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<string>("Role")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.HasKey("UserId");
+                    b.HasKey("Id");
 
                     b.ToTable("Member");
                 });
@@ -436,17 +376,6 @@ namespace Sparsha_backend.Migrations
                     b.Navigation("Item");
                 });
 
-            modelBuilder.Entity("Sparsha_backend.Models.Client", b =>
-                {
-                    b.HasOne("Sparsha_backend.Models.Member", "Member")
-                        .WithOne("Client")
-                        .HasForeignKey("Sparsha_backend.Models.Client", "ClientId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.Navigation("Member");
-                });
-
             modelBuilder.Entity("Sparsha_backend.Models.ItemOfSellers", b =>
                 {
                     b.HasOne("Sparsha_backend.Models.Seller", "Seller")
@@ -477,17 +406,6 @@ namespace Sparsha_backend.Migrations
                     b.Navigation("Order");
                 });
 
-            modelBuilder.Entity("Sparsha_backend.Models.Seller", b =>
-                {
-                    b.HasOne("Sparsha_backend.Models.Member", "Member")
-                        .WithOne("Seller")
-                        .HasForeignKey("Sparsha_backend.Models.Seller", "SellerId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.Navigation("Member");
-                });
-
             modelBuilder.Entity("Sparsha_backend.Models.WishlistItems", b =>
                 {
                     b.HasOne("Sparsha_backend.Models.Items", "Item")
@@ -502,15 +420,6 @@ namespace Sparsha_backend.Migrations
             modelBuilder.Entity("Sparsha_backend.Models.Cart", b =>
                 {
                     b.Navigation("Items");
-                });
-
-            modelBuilder.Entity("Sparsha_backend.Models.Member", b =>
-                {
-                    b.Navigation("Client")
-                        .IsRequired();
-
-                    b.Navigation("Seller")
-                        .IsRequired();
                 });
 
             modelBuilder.Entity("Sparsha_backend.Models.Order", b =>

@@ -28,94 +28,94 @@ namespace Sparsha_backend.Controllers
             _mailService = mailService;
         }
 
-        [HttpPost("Send_Otp")]
-        public async Task<IActionResult> SendOtp([FromBody] GetOtp request)
-        {
-            if (request == null || string.IsNullOrWhiteSpace(request.MobileNumber))
-            {
-                return BadRequest("Mobile number is required");
-            }
-            try
-            {
-                var result = await _twilioService.SendOtpAsync(request.MobileNumber, "Your OTP for Astha registration");
-                if (!string.IsNullOrEmpty(result))
-                {
-                    return Ok(new { msg = "OTP sent to your mobile number" });
-                }
-                return StatusCode(500, "Failed to send OTP");
-            }
-            catch (Exception ex)
-            {
-                return StatusCode(500, $"Error sending OTP:{ex.Message}");
-            }
-        }
+        //[HttpPost("Send_Otp")]
+        //public async Task<IActionResult> SendOtp([FromBody] GetOtp request)
+        //{
+        //    if (request == null || string.IsNullOrWhiteSpace(request.MobileNumber))
+        //    {
+        //        return BadRequest("Mobile number is required");
+        //    }
+        //    try
+        //    {
+        //        var result = await _twilioService.SendOtpAsync(request.MobileNumber, "Your OTP for Astha registration");
+        //        if (!string.IsNullOrEmpty(result))
+        //        {
+        //            return Ok(new { msg = "OTP sent to your mobile number" });
+        //        }
+        //        return StatusCode(500, "Failed to send OTP");
+        //    }
+        //    catch (Exception ex)
+        //    {
+        //        return StatusCode(500, $"Error sending OTP:{ex.Message}");
+        //    }
+        //}
 
 
-        [HttpPost("Verify_Otp")]
-        public async Task<IActionResult> VerifyOtp([FromBody] VerifyOtp request)
-        {
-            if(request == null || string.IsNullOrWhiteSpace(request.MobileNumber) || string.IsNullOrWhiteSpace(request.Otp))
-            {
-                return BadRequest("Mobile Number and Otp are not valid.");
-            }
-            try
-            {
-                bool isVerified = await _twilioService.VerifyOtpAsync(request.MobileNumber, request.Otp);
-                if (isVerified)
-                {
-                    return Ok(new { msg = "OTP verified successfully" });
-                }
-                else
-                {
-                    return BadRequest(new {msg= "OTP is invalid or Expired OTP" });
-                }
-            }
-            catch(Exception ex)
-            {
-                return StatusCode(500, $"Error verifying OTP: {ex.Message}");
-            }
-        }
+        //[HttpPost("Verify_Otp")]
+        //public async Task<IActionResult> VerifyOtp([FromBody] VerifyOtp request)
+        //{
+        //    if(request == null || string.IsNullOrWhiteSpace(request.MobileNumber) || string.IsNullOrWhiteSpace(request.Otp))
+        //    {
+        //        return BadRequest("Mobile Number and Otp are not valid.");
+        //    }
+        //    try
+        //    {
+        //        bool isVerified = await _twilioService.VerifyOtpAsync(request.MobileNumber, request.Otp);
+        //        if (isVerified)
+        //        {
+        //            return Ok(new { msg = "OTP verified successfully" });
+        //        }
+        //        else
+        //        {
+        //            return BadRequest(new {msg= "OTP is invalid or Expired OTP" });
+        //        }
+        //    }
+        //    catch(Exception ex)
+        //    {
+        //        return StatusCode(500, $"Error verifying OTP: {ex.Message}");
+        //    }
+        //}
 
-        [HttpPost("Register")]
-        public async Task<IActionResult> Register([FromBody] Register request)
-        {
-            if (request == null)
-            {
-                return BadRequest("Invalid Data");
-            }
-            if (request.Password != request.ConfirmPassword)
-            {
-                return BadRequest("Passwords do not match.");
-            }
-            try
-            {
+        //[HttpPost("Register")]
+        //public async Task<IActionResult> Register([FromBody] Register request)
+        //{
+        //    if (request == null)
+        //    {
+        //        return BadRequest("Invalid Data");
+        //    }
+        //    if (request.Password != request.ConfirmPassword)
+        //    {
+        //        return BadRequest("Passwords do not match.");
+        //    }
+        //    try
+        //    {
 
-                string hashedPassword = BCrypt.Net.BCrypt.HashPassword(request.Password);
-                var member = new Member { 
-                    FirstName = request.FirstName, 
-                    LastName = request.LastName, 
-                    Email = request.Email, 
-                    MobileNumber = request.MobileNumber, 
-                    Password = hashedPassword,
-                    Address = request.Address,
-                };
-                await _itemDbContext.Members.AddAsync(member);
-                await _itemDbContext.SaveChangesAsync();
+        //        string hashedPassword = BCrypt.Net.BCrypt.HashPassword(request.Password);
+        //        var member = new Member { 
+        //            FirstName = request.FirstName, 
+        //            LastName = request.LastName, 
+        //            Email = request.Email, 
+        //            MobileNumber = request.MobileNumber, 
+        //            Password = hashedPassword,
+        //            Address = request.Address,
+        //        };
+        //        await _itemDbContext.Members.AddAsync(member);
+        //        await _itemDbContext.SaveChangesAsync();
 
-                await _twilioService.SendSmsAsync(request.MobileNumber,
-                    $"Your registratoin is successful. Welcome to our Sparsha Family!");
+        //        await _twilioService.SendSmsAsync(request.MobileNumber,
+        //            $"Your registratoin is successful. Welcome to our Sparsha Family!");
 
-                return Ok(new {message= "User registered successfully" });
-            }
-            catch (Exception ex)
-            {
-                if(ex.InnerException != null)
-                {
-                    return StatusCode(500, $"Error during registration: {ex.InnerException.Message}");
-                }
-                return StatusCode(500, $"Error during registration: {ex.Message}");
-            }
-        }
+        //        return Ok(new {message= "User registered successfully" });
+        //    }
+        //    catch (Exception ex)
+        //    {
+        //        if(ex.InnerException != null)
+        //        {
+        //            return StatusCode(500, $"Error during registration: {ex.InnerException.Message}");
+        //        }
+        //        return StatusCode(500, $"Error during registration: {ex.Message}");
+        //    }
+        //}
 
         [HttpPost("sendCode")]
         public async Task<IActionResult> SendCode([FromBody] EmailRequest request)
@@ -163,6 +163,18 @@ namespace Sparsha_backend.Controllers
                 }
                 string sellerId = Guid.NewGuid().ToString().Substring(0, 6).ToUpper();
                 string hashedPassword = BCrypt.Net.BCrypt.HashPassword(request.Password);
+                var member = new Member
+                {
+                    UserId = sellerId,
+                    Email = request.Email,
+                    Name = request.Name,
+                    Password = hashedPassword,
+                    Address = request.Address,
+                    MobileNumber = request.MobileNumber,
+                    PinCode = request.Pincode,
+                    Role = "Seller"
+                };
+                await _itemDbContext.Members.AddAsync(member);
                 var seller = new Seller
                 {
                     Name = request.Name,
@@ -194,8 +206,60 @@ namespace Sparsha_backend.Controllers
 
         }
 
-        [HttpPost("login")]
-        public async Task<IActionResult> Login([FromBody] SellerLogin login)
+        [HttpPost("RegisterClient")]
+        public async Task<IActionResult> RegisterClient([FromBody] ClientReg request)
+        {
+            if (request == null)
+                return BadRequest("Invalid data");
+            if (request.Password != request.ConfirmPassword)
+                return BadRequest("Passwords do not match.");
+            try
+            {
+                var existingClient = await _itemDbContext.Members.FirstOrDefaultAsync(m => m.Email == request.Email);
+                if(existingClient != null)
+                    return BadRequest("A user with this email already exists.");
+                string clientId = Guid.NewGuid().ToString().Substring(0, 6).ToUpper();
+                string hashedPassword = BCrypt.Net.BCrypt.HashPassword(request.Password);
+                var member = new Member
+                {
+                    UserId = clientId,
+                    Email = request.Email,
+                    Name = request.Name,
+                    Password = hashedPassword,
+                    Address = request.Address,
+                    MobileNumber = request.MobileNumber,
+                    PinCode = request.Pincode,
+                    Role = "Client",
+                };
+                await _itemDbContext.Members.AddAsync(member);
+                var client = new Client
+                {
+                    Name = request.Name,
+                    ClientId = clientId,
+                    Email = request.Email,
+                    MobileNumber = request.MobileNumber,
+                    Address = request.Address,
+                    Pincode = request.Pincode,
+                    Password = hashedPassword
+                };
+                await _itemDbContext.Clients.AddAsync(client);
+                await _itemDbContext.SaveChangesAsync();
+                var mailService = new MailService();
+                await mailService.SendSellerIdAsync(request.Email, request.Name, client.ClientId);
+                return Ok(new { message = "Registration successful." });
+            } catch (Exception ex)
+            {
+                if (ex.InnerException != null)
+                {
+                    return StatusCode(500, $"Error during registration :{ex.InnerException.Message}");
+                }
+                return StatusCode(500, $"Error during registration:{ex.Message}");
+            }
+        }
+
+
+        [HttpPost("Sellerlogin")]
+        public async Task<IActionResult> SellerLogin([FromBody] SellerLogin login)
         {
             var seller = await _itemDbContext.Sellers
                 .FirstOrDefaultAsync(s => s.SellerId == login.SellerId);
@@ -247,17 +311,93 @@ namespace Sparsha_backend.Controllers
             });
         }
 
-        [Authorize]
-        [HttpGet("SellerProfile")]
-        public async Task<IActionResult> GetProfile()
+        [HttpPost("Clientlogin")]
+        public async Task<IActionResult> ClientLogin([FromBody] ClientLogin login)
         {
-            var sellerId = User.FindFirst("SellerId")?.Value;
-            var seller = await _itemDbContext.Sellers.FirstOrDefaultAsync(s => s.SellerId == sellerId);
+            var client = await _itemDbContext.Clients
+                .FirstOrDefaultAsync(c => c.ClientId == login.ClientId);
 
-            if (seller == null)
-                return NotFound("Seller not found.");
+            if (client == null)
+                return Unauthorized("Invalid SellerId or Password.");
 
-            return Ok(new { seller.Name, seller.Email, seller.StoreName });
+            bool isPasswordValid = BCrypt.Net.BCrypt.Verify(login.Password, client.Password);
+            if (!isPasswordValid)
+                return Unauthorized("Invalid SellerId or Password.");
+
+            var log = new ClientLoginLog
+            {
+                ClientId = login.ClientId,
+                Status = (client != null && isPasswordValid) ? "Success" : "Failed",
+                Timestamp = DateTime.UtcNow,
+                IpAddress = HttpContext.Connection.RemoteIpAddress?.ToString() ?? "Unknown"
+            };
+            _itemDbContext.LoggedClients.Add(log);
+            await _itemDbContext.SaveChangesAsync();
+
+
+            var tokenHandler = new JwtSecurityTokenHandler();
+            var key = Encoding.UTF8.GetBytes("MyUltraSecureJWTSecretKey!1234567890");
+            var tokenDescriptor = new SecurityTokenDescriptor
+            {
+                Subject = new ClaimsIdentity(new[]
+                {
+            new Claim("ClientId", client.ClientId),
+            new Claim(ClaimTypes.Name, client.Name),
+            new Claim(ClaimTypes.Email, client.Email)
+        }),
+                Expires = DateTime.UtcNow.AddHours(24),
+                Issuer = "yourdomain.com",
+                Audience = "yourdomain.com",
+                SigningCredentials = new SigningCredentials(
+                    new SymmetricSecurityKey(key), SecurityAlgorithms.HmacSha256Signature)
+            };
+
+            var token = tokenHandler.CreateToken(tokenDescriptor);
+            string jwt = tokenHandler.WriteToken(token);
+
+            return Ok(new
+            {
+                token,
+                clientId = client.ClientId,
+                name = client.Name,
+                email = client.Email
+            });
+        }
+
+        [HttpGet("Profile/{userId}")]
+        public async Task<IActionResult> GetProfile(string userId)
+        {
+            var member = await _itemDbContext.Members
+                .FindAsync(userId);
+            if(member == null)
+            {
+                return NotFound("Member not found");
+            }
+            var client = await _itemDbContext.Clients.FirstOrDefaultAsync(c => c.ClientId == userId);
+            var seller = await _itemDbContext.Sellers.FirstOrDefaultAsync(s => s.SellerId == userId);
+            return Ok(new
+            {
+                member.UserId,
+                member.Email,
+                member.MobileNumber,
+                member.Address,
+                member.PinCode,
+                Role = client != null ? "Client" : seller != null ? "Seller" : "Unknown",
+                Name = client?.Name ?? seller?.Name,
+            });
+        }
+
+        [HttpGet("GetEmail/{userId}")]
+        public async Task<IActionResult> GetEmail(string userId)
+        {
+            var user = await _itemDbContext.Sellers
+                .AsNoTracking()
+                .FirstOrDefaultAsync(u => u.SellerId == userId);
+            if(user == null)
+            {
+                return NotFound(new { message = "user not found" });
+            }
+            return Ok(new { email = user.Email });
         }
 
 
