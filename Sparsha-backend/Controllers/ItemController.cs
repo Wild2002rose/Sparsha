@@ -31,6 +31,20 @@ namespace Sparsha_backend.Controllers
             return Ok(categories);
         }
 
+        [HttpGet("GetAllItems")]
+        public async Task<IActionResult> GetGlobalItems()
+        {
+            var items = await _itemDbContext.GlobalItems.Select(i => new
+            {
+                i.Name,
+                i.ImagePath,
+                i.CurrentBid,
+                i.Price,
+                i.Description
+            }).ToListAsync();
+            return Ok(items);
+        }
+
         [HttpPost("upload")]
         public async Task<IActionResult> UploadItem([FromForm] UploadItem item)
         {
@@ -275,6 +289,7 @@ namespace Sparsha_backend.Controllers
                 OrderDate = DateTime.UtcNow,
                 PaymentMethod = dto.PaymentMethod,
                 Address = dto.Address,
+                TotalPrice = dto.TotalPrice,
                 OrderItems = new List<OrderItem>()
             };
             foreach (var cartItem in cart.Items)
@@ -321,6 +336,41 @@ namespace Sparsha_backend.Controllers
 
             return BadRequest(new { message = "Invalid or expired code." });
         }
+        [HttpGet("track-order/{userId}")]
+        public async Task<IActionResult> GetYourOrders(string userId)
+        {
+            var orders = await _itemDbContext.Orders
+                .Where(o => o.UserId == userId)
+                .Include(o => o.OrderItems)
+                    .ThenInclude(oi => oi.Item)
+                .ToListAsync();
+
+            if (orders == null || !orders.Any())
+            {
+                return NotFound("No orders found for the user.");
+            }
+
+            var result = orders.Select(order => new
+            {
+                OrderId = order.OrderId,
+                OrderDate = order.OrderDate,
+                PaymentMethod = order.PaymentMethod,
+                TotalPrice = order.TotalPrice,
+                Items = order.OrderItems.Select(i => new
+                {
+                    OrderItemId = i.OrderItemId,
+                    ItemId = i.ItemId,
+                    Quantity = i.Quantity,
+                    Name = i.Item.Name,
+                    Price = i.Item.Price,
+                    ImagePath = i.Item.ImagePath
+                }).ToList()
+            });
+
+            return Ok(result);
+        }
+
+
 
     }
 

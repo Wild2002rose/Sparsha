@@ -3,45 +3,32 @@
   "WorkspaceRootPath": "C:\\Users\\Nasrin Parvin\\Desktop\\Sparsha\\Sparsha-backend\\",
   "Documents": [
     {
-      "AbsoluteMoniker": "D:0:0:{6EA291E5-BBC9-44FA-81F7-537503320982}|Sparsha-backend.csproj|c:\\users\\nasrin parvin\\desktop\\sparsha\\sparsha-backend\\controllers\\authcontroller.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
-      "RelativeMoniker": "D:0:0:{6EA291E5-BBC9-44FA-81F7-537503320982}|Sparsha-backend.csproj|solutionrelative:controllers\\authcontroller.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+      "AbsoluteMoniker": "D:0:0:{6EA291E5-BBC9-44FA-81F7-537503320982}|Sparsha-backend.csproj|c:\\users\\nasrin parvin\\desktop\\sparsha\\sparsha-backend\\controllers\\itemcontroller.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{6EA291E5-BBC9-44FA-81F7-537503320982}|Sparsha-backend.csproj|solutionrelative:controllers\\itemcontroller.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
     },
     {
-      "AbsoluteMoniker": "D:0:0:{6EA291E5-BBC9-44FA-81F7-537503320982}|Sparsha-backend.csproj|c:\\users\\nasrin parvin\\desktop\\sparsha\\sparsha-backend\\models\\loginlog.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
-      "RelativeMoniker": "D:0:0:{6EA291E5-BBC9-44FA-81F7-537503320982}|Sparsha-backend.csproj|solutionrelative:models\\loginlog.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+      "AbsoluteMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|C:\\Users\\Nasrin Parvin\\AppData\\Local\\Temp\\uekc4swy..sql||{CC5D8DF0-88F4-4BB2-9DBB-B48CEE65C30A}|"
     },
     {
-      "AbsoluteMoniker": "D:0:0:{6EA291E5-BBC9-44FA-81F7-537503320982}|Sparsha-backend.csproj|c:\\users\\nasrin parvin\\desktop\\sparsha\\sparsha-backend\\models\\clientloginlog.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
-      "RelativeMoniker": "D:0:0:{6EA291E5-BBC9-44FA-81F7-537503320982}|Sparsha-backend.csproj|solutionrelative:models\\clientloginlog.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+      "AbsoluteMoniker": "D:0:0:{6EA291E5-BBC9-44FA-81F7-537503320982}|Sparsha-backend.csproj|c:\\users\\nasrin parvin\\desktop\\sparsha\\sparsha-backend\\models\\placeorderdto.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{6EA291E5-BBC9-44FA-81F7-537503320982}|Sparsha-backend.csproj|solutionrelative:models\\placeorderdto.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
     },
     {
-      "AbsoluteMoniker": "D:0:0:{6EA291E5-BBC9-44FA-81F7-537503320982}|Sparsha-backend.csproj|c:\\users\\nasrin parvin\\desktop\\sparsha\\sparsha-backend\\models\\clientlogin.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
-      "RelativeMoniker": "D:0:0:{6EA291E5-BBC9-44FA-81F7-537503320982}|Sparsha-backend.csproj|solutionrelative:models\\clientlogin.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+      "AbsoluteMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|C:\\Users\\Nasrin Parvin\\AppData\\Local\\Temp\\ojpaymr3..sql||{CC5D8DF0-88F4-4BB2-9DBB-B48CEE65C30A}|"
     },
     {
       "AbsoluteMoniker": "D:0:0:{6EA291E5-BBC9-44FA-81F7-537503320982}|Sparsha-backend.csproj|c:\\users\\nasrin parvin\\desktop\\sparsha\\sparsha-backend\\data\\itemdbcontext.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
       "RelativeMoniker": "D:0:0:{6EA291E5-BBC9-44FA-81F7-537503320982}|Sparsha-backend.csproj|solutionrelative:data\\itemdbcontext.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
     },
     {
-      "AbsoluteMoniker": "D:0:0:{6EA291E5-BBC9-44FA-81F7-537503320982}|Sparsha-backend.csproj|c:\\users\\nasrin parvin\\desktop\\sparsha\\sparsha-backend\\models\\member.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
-      "RelativeMoniker": "D:0:0:{6EA291E5-BBC9-44FA-81F7-537503320982}|Sparsha-backend.csproj|solutionrelative:models\\member.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+      "AbsoluteMoniker": "D:0:0:{6EA291E5-BBC9-44FA-81F7-537503320982}|Sparsha-backend.csproj|c:\\users\\nasrin parvin\\desktop\\sparsha\\sparsha-backend\\controllers\\authcontroller.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{6EA291E5-BBC9-44FA-81F7-537503320982}|Sparsha-backend.csproj|solutionrelative:controllers\\authcontroller.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
     },
     {
-      "AbsoluteMoniker": "D:0:0:{6EA291E5-BBC9-44FA-81F7-537503320982}|Sparsha-backend.csproj|c:\\users\\nasrin parvin\\desktop\\sparsha\\sparsha-backend\\models\\client.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
-      "RelativeMoniker": "D:0:0:{6EA291E5-BBC9-44FA-81F7-537503320982}|Sparsha-backend.csproj|solutionrelative:models\\client.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+      "AbsoluteMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|C:\\Users\\Nasrin Parvin\\AppData\\Local\\Temp\\uekc4swy..sql||{CC5D8DF0-88F4-4BB2-9DBB-B48CEE65C30A}|CodeFrame"
     },
     {
-      "AbsoluteMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|C:\\Users\\Nasrin Parvin\\AppData\\Local\\Temp\\xw2ot4lm..sql||{CC5D8DF0-88F4-4BB2-9DBB-B48CEE65C30A}|"
-    },
-    {
-      "AbsoluteMoniker": "D:0:0:{6EA291E5-BBC9-44FA-81F7-537503320982}|Sparsha-backend.csproj|c:\\users\\nasrin parvin\\desktop\\sparsha\\sparsha-backend\\models\\seller.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
-      "RelativeMoniker": "D:0:0:{6EA291E5-BBC9-44FA-81F7-537503320982}|Sparsha-backend.csproj|solutionrelative:models\\seller.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
-    },
-    {
-      "AbsoluteMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|C:\\Users\\Nasrin Parvin\\AppData\\Local\\Temp\\xw2ot4lm..sql||{CC5D8DF0-88F4-4BB2-9DBB-B48CEE65C30A}|CodeFrame"
-    },
-    {
-      "AbsoluteMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|C:\\Users\\Nasrin Parvin\\AppData\\Local\\Temp\\xw2ot4lm..sql||{CC5D8DF0-88F4-4BB2-9DBB-B48CEE65C30A}|ResultFrame"
+      "AbsoluteMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|C:\\Users\\Nasrin Parvin\\AppData\\Local\\Temp\\uekc4swy..sql||{CC5D8DF0-88F4-4BB2-9DBB-B48CEE65C30A}|ResultFrame"
     }
   ],
   "DocumentGroupContainers": [
@@ -56,67 +43,61 @@
             {
               "$type": "Document",
               "DocumentIndex": 1,
-              "Title": "LoginLog.cs",
-              "DocumentMoniker": "C:\\Users\\Nasrin Parvin\\Desktop\\Sparsha\\Sparsha-backend\\Models\\LoginLog.cs",
-              "RelativeDocumentMoniker": "Models\\LoginLog.cs",
-              "ToolTip": "C:\\Users\\Nasrin Parvin\\Desktop\\Sparsha\\Sparsha-backend\\Models\\LoginLog.cs",
-              "RelativeToolTip": "Models\\LoginLog.cs",
-              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAgAAAAtAAAAAAAAAA==",
-              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2025-06-08T21:53:34.276Z",
+              "Title": "SQLQuery1.sql ",
+              "DocumentMoniker": "C:\\Users\\Nasrin Parvin\\AppData\\Local\\Temp\\uekc4swy..sql",
+              "RelativeDocumentMoniker": "..\\..\\..\\AppData\\Local\\Temp\\uekc4swy..sql",
+              "ToolTip": "SQLQuery1.sql *",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000826|",
+              "WhenOpened": "2025-06-16T06:49:04.485Z",
               "EditorCaption": ""
             },
             {
               "$type": "Document",
               "DocumentIndex": 2,
-              "Title": "ClientLoginLog.cs",
-              "DocumentMoniker": "C:\\Users\\Nasrin Parvin\\Desktop\\Sparsha\\Sparsha-backend\\Models\\ClientLoginLog.cs",
-              "RelativeDocumentMoniker": "Models\\ClientLoginLog.cs",
-              "ToolTip": "C:\\Users\\Nasrin Parvin\\Desktop\\Sparsha\\Sparsha-backend\\Models\\ClientLoginLog.cs",
-              "RelativeToolTip": "Models\\ClientLoginLog.cs",
-              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAsAAAAAAAAAAAAAAA==",
+              "Title": "PlaceOrderDto.cs",
+              "DocumentMoniker": "C:\\Users\\Nasrin Parvin\\Desktop\\Sparsha\\Sparsha-backend\\Models\\PlaceOrderDto.cs",
+              "RelativeDocumentMoniker": "Models\\PlaceOrderDto.cs",
+              "ToolTip": "C:\\Users\\Nasrin Parvin\\Desktop\\Sparsha\\Sparsha-backend\\Models\\PlaceOrderDto.cs",
+              "RelativeToolTip": "Models\\PlaceOrderDto.cs",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAwAAAASAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2025-06-08T21:54:05.545Z",
-              "EditorCaption": ""
+              "WhenOpened": "2025-06-16T04:51:55.548Z"
             },
             {
               "$type": "Document",
               "DocumentIndex": 3,
-              "Title": "ClientLogin.cs",
-              "DocumentMoniker": "C:\\Users\\Nasrin Parvin\\Desktop\\Sparsha\\Sparsha-backend\\Models\\ClientLogin.cs",
-              "RelativeDocumentMoniker": "Models\\ClientLogin.cs",
-              "ToolTip": "C:\\Users\\Nasrin Parvin\\Desktop\\Sparsha\\Sparsha-backend\\Models\\ClientLogin.cs",
-              "RelativeToolTip": "Models\\ClientLogin.cs",
-              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAgAAAAAAAAAAAAAAA==",
-              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2025-06-08T21:52:02.073Z",
-              "EditorCaption": ""
+              "Title": "ojpaymr3..sql",
+              "DocumentMoniker": "C:\\Users\\Nasrin Parvin\\AppData\\Local\\Temp\\ojpaymr3..sql",
+              "RelativeDocumentMoniker": "..\\..\\..\\AppData\\Local\\Temp\\ojpaymr3..sql",
+              "ToolTip": "C:\\Users\\Nasrin Parvin\\AppData\\Local\\Temp\\ojpaymr3..sql",
+              "RelativeToolTip": "..\\..\\..\\AppData\\Local\\Temp\\ojpaymr3..sql",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000826|",
+              "WhenOpened": "2025-06-16T03:28:02.179Z"
             },
             {
               "$type": "Document",
               "DocumentIndex": 0,
-              "Title": "AuthController.cs",
-              "DocumentMoniker": "C:\\Users\\Nasrin Parvin\\Desktop\\Sparsha\\Sparsha-backend\\Controllers\\AuthController.cs",
-              "RelativeDocumentMoniker": "Controllers\\AuthController.cs",
-              "ToolTip": "C:\\Users\\Nasrin Parvin\\Desktop\\Sparsha\\Sparsha-backend\\Controllers\\AuthController.cs",
-              "RelativeToolTip": "Controllers\\AuthController.cs",
-              "ViewState": "AgIAADgBAAAAAAAAAAAswIIBAAAPAAAAAAAAAA==",
+              "Title": "ItemController.cs",
+              "DocumentMoniker": "C:\\Users\\Nasrin Parvin\\Desktop\\Sparsha\\Sparsha-backend\\Controllers\\ItemController.cs",
+              "RelativeDocumentMoniker": "Controllers\\ItemController.cs",
+              "ToolTip": "C:\\Users\\Nasrin Parvin\\Desktop\\Sparsha\\Sparsha-backend\\Controllers\\ItemController.cs",
+              "RelativeToolTip": "Controllers\\ItemController.cs",
+              "ViewState": "AgIAABgAAAAAAAAAAAAYwCkAAAAYAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2025-06-08T21:18:00.905Z",
+              "WhenOpened": "2025-06-13T04:53:09.257Z",
               "EditorCaption": ""
             },
             {
               "$type": "Document",
               "DocumentIndex": 5,
-              "Title": "Member.cs",
-              "DocumentMoniker": "C:\\Users\\Nasrin Parvin\\Desktop\\Sparsha\\Sparsha-backend\\Models\\Member.cs",
-              "RelativeDocumentMoniker": "Models\\Member.cs",
-              "ToolTip": "C:\\Users\\Nasrin Parvin\\Desktop\\Sparsha\\Sparsha-backend\\Models\\Member.cs",
-              "RelativeToolTip": "Models\\Member.cs",
-              "ViewState": "AgIAAAAAAAAAAAAAAAAAABAAAAAmAAAAAAAAAA==",
+              "Title": "AuthController.cs",
+              "DocumentMoniker": "C:\\Users\\Nasrin Parvin\\Desktop\\Sparsha\\Sparsha-backend\\Controllers\\AuthController.cs",
+              "RelativeDocumentMoniker": "Controllers\\AuthController.cs",
+              "ToolTip": "C:\\Users\\Nasrin Parvin\\Desktop\\Sparsha\\Sparsha-backend\\Controllers\\AuthController.cs",
+              "RelativeToolTip": "Controllers\\AuthController.cs",
+              "ViewState": "AgIAANEAAAAAAAAAAAA4wIkBAAAfAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2025-06-08T20:44:22.377Z",
-              "EditorCaption": ""
+              "WhenOpened": "2025-06-08T21:18:00.905Z"
             },
             {
               "$type": "Document",
@@ -126,47 +107,9 @@
               "RelativeDocumentMoniker": "Data\\ItemDbContext.cs",
               "ToolTip": "C:\\Users\\Nasrin Parvin\\Desktop\\Sparsha\\Sparsha-backend\\Data\\ItemDbContext.cs",
               "RelativeToolTip": "Data\\ItemDbContext.cs",
-              "ViewState": "AgIAAAMAAAAAAAAAAAAAABEAAAAuAAAAAAAAAA==",
+              "ViewState": "AgIAAAUAAAAAAAAAAAAxwBEAAAAuAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2025-06-05T09:20:48.748Z",
-              "EditorCaption": ""
-            },
-            {
-              "$type": "Document",
-              "DocumentIndex": 6,
-              "Title": "Client.cs",
-              "DocumentMoniker": "C:\\Users\\Nasrin Parvin\\Desktop\\Sparsha\\Sparsha-backend\\Models\\Client.cs",
-              "RelativeDocumentMoniker": "Models\\Client.cs",
-              "ToolTip": "C:\\Users\\Nasrin Parvin\\Desktop\\Sparsha\\Sparsha-backend\\Models\\Client.cs",
-              "RelativeToolTip": "Models\\Client.cs",
-              "ViewState": "AgIAAAAAAAAAAAAAAAAAABEAAAAAAAAAAAAAAA==",
-              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2025-06-08T20:46:17.417Z",
-              "EditorCaption": ""
-            },
-            {
-              "$type": "Document",
-              "DocumentIndex": 8,
-              "Title": "Seller.cs",
-              "DocumentMoniker": "C:\\Users\\Nasrin Parvin\\Desktop\\Sparsha\\Sparsha-backend\\Models\\Seller.cs",
-              "RelativeDocumentMoniker": "Models\\Seller.cs",
-              "ToolTip": "C:\\Users\\Nasrin Parvin\\Desktop\\Sparsha\\Sparsha-backend\\Models\\Seller.cs",
-              "RelativeToolTip": "Models\\Seller.cs",
-              "ViewState": "AgIAAAkAAAAAAAAAAAAYwBQAAAAAAAAAAAAAAA==",
-              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2025-06-08T20:45:42.455Z",
-              "EditorCaption": ""
-            },
-            {
-              "$type": "Document",
-              "DocumentIndex": 7,
-              "Title": "SQLQuery1.sql ",
-              "DocumentMoniker": "C:\\Users\\Nasrin Parvin\\AppData\\Local\\Temp\\xw2ot4lm..sql",
-              "RelativeDocumentMoniker": "..\\..\\..\\AppData\\Local\\Temp\\xw2ot4lm..sql",
-              "ToolTip": "SQLQuery1.sql *",
-              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000826|",
-              "WhenOpened": "2025-06-08T16:28:45.243Z",
-              "EditorCaption": ""
+              "WhenOpened": "2025-06-05T09:20:48.748Z"
             }
           ]
         }
