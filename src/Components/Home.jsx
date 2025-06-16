@@ -133,7 +133,7 @@ function Home() {
           'Content-Type' : 'application/json',
         },
       });
-      login( response.data.name,response.data.sellerId);
+      login( response.data.name,response.data.sellerId, "Seller");
       setError('');
       toast.success("Logged in successfully",{
         duration: 5000,
@@ -291,7 +291,8 @@ function Home() {
               />
               <div className="mt-6 h-16 bg-tag-lp content-center rounded-lg">
                 <h1 className="text-tag-l2 font-medium w-full px-2 hover:text-tag-dark
-                text-lg text-center cursor-pointer">
+                text-lg text-center cursor-pointer"
+                >
                 {name}
               </h1>
               </div>
@@ -508,6 +509,88 @@ function Home() {
       >
         <FaBell className="h-5 w-5 dark:text-tag-l2 text-dark dark:hover:text-tag-lp hover:text-tag-lp animate-ring" />
       </button>
+
+      {/* {showItems && (
+                  <div className="fixed absolute md:h-[620px] h-[1200px] md:w-[92%] w-[95%] bg-tag-l3 top-10 md:mx-5 left-2 md:my-20 my-10">
+                      <div className="flex justify-between items-center px-6 py-6">
+                          <h1 className="font-bold md:text-3xl text-xl md:ml-[40%] ml-[10%] border-b border-tag-l">Shop By Category</h1>
+                          <FaTimes onClick={() => setShowItems(false)} className="cursor-pointer h-6 w-6 text-tag-l hover:text-tag-dark"/>
+                      </div>
+                      <div className="md:flex md:gap-20 grid gap-0">
+      
+                          <div className="md:w-[75%] w-[90%]">
+                          {Array.isArray(item) && item.length > 0 ? (
+                              item.map((i,index) => (
+      
+                              <div key={i.ItemId} className="border dark:border-tag-b2 border-tag-l5 dark:bg-black bg-tag-l5 shadow-lg md:p-10 p-4
+                               rounded-xl  md:h-[450px] h-[450px] md:w-[1000px] w-[400px] md:mt-[30px] md:ml-[50px] ml-[10px] md:flex md:gap-10">
+                              <div className="md:w-[580px] md:h-[480px] w-[360px] h-[180px] relative overflow-hidden ">
+                                  <img src={`https://localhost:7269${i.ImagePath}`} alt={i.Name} className=" object-cover w-full h-[78%]" />
+                              </div>
+                              <div className="md:w-[450px] w-[360px]">
+                                  <h2 className="text-2xl font-bold md:py-2 text-center text-tag-lp">{i.Name}</h2>
+                                  <p className="text-sm text-tag-dark dark:text-tag-l2 md:mt-4 mt-2 md:h-[150px] h-[80px]">
+                                  {i.Description} 
+                                  </p>
+                              <div className="flex justify-between items-center">
+                                  <div className="grid md:py-6 py-4">
+                                  <p className="text-tag-dark dark:text-tag-l2 font-bold md:py-2">My Price: <span className="text-tag-lp"> ₹ {i.Price}</span></p>
+                                  <p className="text-tag-dark dark:text-tag-l2 font-bold">Current Bid: <span className="text-tag-lp"> ₹ {i.CurrentBid}</span></p>
+                                  </div>
+                                  <div>
+                                  <FaHeart
+                                  size={24}
+                                  className={`cursor-pointer transition-all duration-300 ${
+                                      inWishlist(i.ItemId) ? "text-red-500" : "text-white"
+                                  }`}
+                                  onClick={() =>{ 
+                                      toggleWishlist(i.ItemId); 
+                                      // addToWishlist(i.ItemId);
+                                  }}
+                                  />
+                                  </div>
+                              </div>
+                              <div className="flex justify-between items-center">
+                                  <button className="h-10 w-40 bg-tag-lp rounded-3xl text-tag-l2 font-semibold hover:bg-tag-l2 hover:text-tag-lp">Raise Bid</button>
+                                  <button className="h-10 w-40 bg-tag-lp rounded-3xl text-tag-l2 font-semibold hover:bg-tag-l2 hover:text-tag-lp"
+                                  onClick = {() => addItemToCart(userId,i.ItemId,quantity)}>Add to cart</button>
+                              </div>
+                              </div>
+                              </div>
+                              
+                                  ))
+                              ) : (
+                                  <p className="text-center font-semibold p-10">No items found</p>
+                              )}
+                          
+                          </div>
+      
+                          <div className="md:mt-[30px] mt-[10px] md:bg-tag-l bg-tag-l3 md:w-[200px] md:h-[450px] h-[130px] w-[400px] md:overflow-y-scroll overflow-x-scroll scrollbar-hide md:grid md:gap-[0px] flex gap-0 mx-4">
+                              {Array.isArray(globalItems) && globalItems.length>0 ? (
+                                  globalItems.map((globalItem, index) => (
+                                      <motion.div 
+                                      key={globalItem.ItemId} 
+                                      ref = {(el) => (itemsRefs.current[globalItem.ItemId] = el)}
+                                      className={`mx-2 my-4 px-2 py-2 shadow-lg cursor-pointer border-2 transition-all duration-200 ${
+                                      selectedItem === globalItem.ItemId
+                                          ? 'border-tag-lp'
+                                          : 'border-tag-l5'
+                                      }`}
+                                      onClick={()=> setSelectedItem(globalItem.ItemId)}
+                                      whileTap={{scale:0.95}}
+                                      whileHover = {{scale:1.05, boxShadow:"0px,0px,10px rgba(0,0,0,0.3)"}}
+                                      transition={{type: "spring", stiffness: 300}}>
+                                          <img src={`https://localhost:7269${globalItem.ImagePath}`} alt={globalItem.Name} className="md:h-[100px] h-[60px] w-full object-cover "/>
+                                          <h1 className="md:text-center md:font-semibold font-normal text-sm md:mt-2">{globalItem.Name}</h1>
+                                      </motion.div>
+                                  ))
+                              ):(
+                                  <p>No items found</p>
+                              )}
+                          </div>
+                      </div>
+                  </div>
+              )} */}
 
     </>
   );

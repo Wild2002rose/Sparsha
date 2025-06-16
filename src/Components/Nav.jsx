@@ -213,6 +213,7 @@ function Nav() {
     const [confirmPassword, setConfirmPassword] = useState("");
     const [mobileNumber, setMobileNumber] = useState('');
     const [address, setAddress]= useState('');
+    const [accept, setAccept] = useState(false);
     const [isCodeSent, setIsCodeSent] = useState(false);
     const [isCodeVerified, setIsCodeVerified] = useState(false);
     const {login} = useAuth();
@@ -221,13 +222,15 @@ function Nav() {
     const [userName, setUserName] = useState("");
     const [userId, setUserId] = useState(null);
     const [showUser, setShowUser] = useState(false);
+    const [step, setStep] = useState("register");
     const userClick = () =>{
         setShowUser(true);
     }
     const handleGetCode = async () => {
         try {
         const response = await axios.post('https://localhost:7269/api/Auth/sendCode', {
-            Email: email
+            Email: email,
+            Name: name
         });
         if(response.status === 200){
             setIsCodeSent(true);
@@ -255,6 +258,15 @@ function Nav() {
         }
 
     };
+    const handleStepSubmit = () => {
+        if(!name || !email || !mobileNumber || !address || !accept) {
+            alert("Please fill in all fields");
+            return;
+        }
+        console.log("Form submitted:", {name, email, mobileNumber,address,accept});
+        handleGetCode();
+        setStep("verify");
+    }
     const handleSubmit = async (e) => {
         e.preventDefault();
         if(password != confirmPassword){
@@ -293,7 +305,7 @@ function Nav() {
             'Content-Type' : 'application/json',
             },
         });
-        login( response.data.name,response.data.sellerId);
+        login( response.data.name,response.data.sellerId, "Client");
         setError('');
         toast.success("Logged in successfully",{
             duration: 5000,
@@ -422,20 +434,24 @@ function Nav() {
 
         {showUser && (
             <div ref={dropDownRef}
-            className="fixed md:ml-[73%] ml-[10%] h-[280px] w-[300px] bg-gradient-to-b from-tag-l3 to-tag-l2 
+            className="fixed md:ml-[73%] ml-[10%] h-auto w-[300px] bg-gradient-to-b from-tag-l3 to-tag-l2 
             border border-tag-l rounded-lg z-10 top-20">
                     
                     {user && user.userName ? ( 
                     <>
                     <div className="ml-6 mr-6 py-6 border-b border-tag-light">
-                        <h1 className="text-gray-700 font-semibold text-xl">Welcome, <span className="text-tag-lp font-semibold">{user.userName} ({user.userId})</span></h1>
+                        <h1 className="text-gray-700 font-semibold text-xl">Welcome, <span className="text-tag-lp font-semibold">{user.userName} </span></h1>
                         <p className="text-tag-dark text-sm mt-2">Manage your account and orders</p>
                     </div>
                     <div className="ml-6 mr-6 py-4 font-normal text-md text-tag-dark space-y-2">
+                        <Link to="/order">
                         <h1 className="hover:text-tag-lp text-tag-dark cursor-pointer">Orders</h1>
+                        </Link>
+                        {user?.role === 'Seller' && (
                         <Link to="/itemsofseller">
                         <h1 className="hover:text-tag-lp text-tag-dark cursor-pointer">Your Products</h1>
                         </Link>
+                        )}
                         <h2 className="hover:text-tag-lp text-tag-dark cursor-pointer">Contact Us</h2>
                         <button
                         onClick={handleLogout}
@@ -459,7 +475,9 @@ function Nav() {
                         onClick={() => setShowRegister(!showRegister)}>Register </h1>
                     </div>
                     <div className="ml-6 mr-6 py-4 font-normal text-md text-tag-dark space-y-2">
+                    <Link to="/order">
                     <h1 className="hover:text-tag-lp text-tag-dark cursor-pointer">Orders</h1>
+                    </Link>
                     <h2 className="hover:text-tag-lp text-tag-dark cursor-pointer">Contact Us</h2>
                     </div>
                     </>
@@ -471,8 +489,11 @@ function Nav() {
 
         {showRegister && (
             <div ref={dropDownRef}
-            className =" fixed dark:bg-pink-100 bg-tag-l3 border dark:border-pink-400 border-tag-l4  md:h-[500px] h-[600px] md:w-[600px] w-[380px] md:ml-[28%] 
+            className =" fixed dark:bg-pink-100 bg-tag-l3 border dark:border-pink-400 border-tag-l4 h-auto md:w-[600px] w-[380px] md:ml-[28%] 
             ml-0 md:top-40 top-20 rounded-lg z-50 p-10 grid gap-4">
+
+                {step == "register" && ( 
+                <>
                 <div className="flex gap-10 ">
                     <input type="text" placeholder="Enter your Firstname" required
                     value={name}
@@ -495,8 +516,14 @@ function Nav() {
                     onChange = {(e) => setAddress(e.target.value)}
                     className="w-full h-12 dark:bg-pink-200 bg-tag-l text-black text-center rounded-lg" />
                 </div>
+                <div>
+                    <input type="text" required placeholder="Enter your Address" value={pincode}
+                    onChange = {(e) => setPincode(e.target.value)}
+                    className="w-full h-12 dark:bg-pink-200 bg-tag-l text-black text-center rounded-lg" />
+                </div>
                 <div className="">
                     <input type="checkbox"  name="accept"
+                    checked={accept} onChange={(e) => setAccept(e.target.checked)}
                     className="h-6 w-6 mt-6 cursor-pointer"/>
                     <label className="ml-4 dark:text-tag-dark text-tag-black font-semibold">
                         By continuing, I agree to the <span className="text-tag-lp cursor-pointer">Terms of Use </span>& 
@@ -504,13 +531,45 @@ function Nav() {
                     </label>
                 </div>
                 <div className="">
-                    <button onClick={() => handleSubmit()}
+                    <button onClick={() => handleStepSubmit()}
                     className="dark:bg-pink-500 bg-tag-l4 border dark:border-tag-lp border-tag-light dark:text-white 
                     text-tag-dark h-10 w-40 rounded-2xl md:ml-[35%] ml-[24%] font-bold text-lg dark:hover:text-tag-dark hover:text-tag-lp">Continue</button>
                 </div>
                 <div className="text-center text-tag-dark font-semibold"><h1>Have trouble to register ? 
                     <span className="text-tag-lp cursor-pointer"> Get Help</span></h1>
                 </div>
+                </>
+                )}
+
+                {step === "verify" && (
+                <>
+                    <h2 className="text-center font-bold text-tag-dark">Verify Your Email or Mobile</h2>
+                    <input type="text" placeholder="Enter verification code" value={code}
+                    onChange = {(e) => setCode(e.target.value)}
+                    className="w-full h-12 dark:bg-pink-200 bg-tag-l text-black text-center rounded-lg" />
+                    <button onClick={() => {setStep("createPassword"); handleVerifyCode();}}
+                    className="bg-green-500 hover:bg-green-600 text-white rounded-lg h-10 font-semibold">
+                    Verify
+                    </button>
+                </>
+                )}
+
+                {step === "createPassword" && (
+                <>
+                    <h2 className="text-center font-bold text-tag-dark">Create Your Password</h2>
+                    <input type="password" placeholder="Enter new password" value={password}
+                    onChange = {(e) => setPassword(e.target.value)}
+                    className="w-full h-12 dark:bg-pink-200 bg-tag-l text-black text-center rounded-lg" />
+                    <input type="password" placeholder="Confirm password" value={confirmPassword}
+                    onChange = {(e) => setConfirmPassword(e.target.value)}
+                    className="w-full h-12 dark:bg-pink-200 bg-tag-l text-black text-center rounded-lg" />
+                    <button onClick={handleSubmit} // replace with real submit
+                    className="bg-blue-500 hover:bg-blue-600 text-white rounded-lg h-10 font-semibold">
+                    Submit
+                    </button>
+                </>
+                )}
+
             </div>
         )}
 

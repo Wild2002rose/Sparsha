@@ -15,7 +15,7 @@ function ItemsOfSeller() {
         setShowForm(true);
     }
     useEffect(() => {
-        const sellerId= localStorage.getItem("sellerId");
+        const sellerId= localStorage.getItem("userId");
         if(!sellerId) {
             console.error("SellerId is not found in localstorage");
         }
@@ -114,7 +114,6 @@ function ItemsOfSeller() {
         .then(response => setCategories(response.data))
         .catch(error => console.error('Error fetching categories'));
     },[]);
-    
     return (
         <>
         <Nav/>

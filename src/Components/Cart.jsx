@@ -1,11 +1,14 @@
 import Nav from "./Nav";
 import End from "./End";
+import Home from "./Home";
 import {useState, useEffect, useRef} from 'react';
 import axios from "axios";
 import toast from "react-hot-toast";
 import { use } from "framer-motion/client";
+import { useNavigate } from "react-router-dom";
 
 function Cart() {
+    const navigate = useNavigate();
     const [cartItems, setCartItems] = useState([]);
     const [userName, setUserName] = useState("");
     const [userId, setUserId] = useState(null);
@@ -80,6 +83,7 @@ function Cart() {
     const [code, setCode] = useState('');
     const [email, setEmail] = useState('');
     const [address, setAddress] = useState('');
+    const [isConfirmStage, setIsConfirmStage] = useState(false);
 
     const sendCode = async () => {
         try {
@@ -97,8 +101,8 @@ function Cart() {
 
     const fetchEmail = async (userId) => {
         try {
-            const response = await axios.get(`https://localhost:7269/api/Auth/GetEmail/${userId}`);
-            return response.data.email;
+            const response = await axios.get(`https://localhost:7269/api/Auth/Profile/${userId}`);
+            return response.data.Email;
         } catch(error) {
             console.error("error fetching email");
             return "";
@@ -131,11 +135,14 @@ function Cart() {
         try{
             const response = await axios.post("https://localhost:7269/api/Item/Place-Order",{
                 UserId: userId,
+                UserName: userName,
                 PaymentMethod: paymentMethod,
-                Address: address
+                Address: address,
+                TotalPrice: totalPrice
             });
             toast.success("Order placed successfully");
             console.log("Order placed successfully");
+            navigate('/')
         } catch(error) {
             toast.error("Error to place order");
             console.error(error.response?.data?.message || "error sending code");
@@ -156,8 +163,18 @@ function Cart() {
 
                         <div className="bg-tag-l md:h-[80px] h-[100px] px-4 py-2 flex gap-10">
                             <div className="w-[75%]">
-                                <h1>Deliver to: <span>Kupnandan</span></h1>
-                                <h1>Address: <span>Kupnandan</span></h1>
+                                <h1>Deliver to: <span>{userName}</span></h1>
+                                <div className="flex gap-2">
+                                    <h1>Address: </h1>
+                                    <input
+                                    type="text"
+                                    placeholder="Enter Full Address with Pincode and Land Mark"
+                                    value={address}
+                                    onChange={(e) => setAddress(e.target.value)}
+                                    className="w-full h-8 p-2 border-b border-tag-l5 bg-transparent"
+                                    required
+                                />
+                                </div>
                             </div>
                             <div className="border-2 border-tag-l5 h-10 w-40 mt-3 mr-2 flex items-center justify-center 
                             rounded-md text-tag-lp font-semibold hover:text-tag-l7">
@@ -203,9 +220,31 @@ function Cart() {
                         </div>
 
                         ) : (
-                        <div className=" p-6 bg-tag-l shadow-md">
-                            <h2 className="text-2xl font-bold text-tag-l7 mb-2">Payment Section</h2>
-                            <div className="grid gap-2">
+                        <div className="p-6 bg-tag-l shadow-md">
+                        <h2 className="text-2xl font-bold text-tag-l7 mb-2">Payment Section</h2>
+
+                        <div className="mb-4">
+                            <label className="flex items-center space-x-3">
+                            <input
+                                type="checkbox"
+                                className="h-5 w-5"
+                                checked={isCodeSelected}
+                                onChange={() => {
+                                setIsCodeSelected(!isCodeSelected);
+                                if (!isCodeSelected) {
+                                    setPaymentMethod("COD");
+                                    sendCode();
+                                } else {
+                                    setPaymentMethod(""); 
+                                }
+                                }}
+                            />
+                            <span className="text-tag-l7 font-semibold text-lg">Cash On Delivery</span>
+                            </label>
+                        </div>
+
+                        {!isCodeSelected && (
+                            <>
                             <div>
                                 <label className="block text-tag-l7 mb-1">Card Number</label>
                                 <input
@@ -215,7 +254,7 @@ function Cart() {
                                 />
                             </div>
 
-                            <div className="flex gap-4">
+                            <div className="flex gap-4 mt-2">
                                 <div className="flex-1">
                                 <label className="block text-tag-l7 mb-1">Expiry</label>
                                 <input
@@ -233,35 +272,54 @@ function Cart() {
                                 />
                                 </div>
                             </div>
+                            </>
+                        )}
 
-                            <div className="mt-2 mb-2">
-                                <input type="checkbox" className="h-5 w-5 mr-4" checked={isCodeSelected} 
-                                onChange={() => {setIsCodeSelected(!isCodeSelected); sendCode();}}/>
-                                <label htmlFor="" className="font-semibold text-lg text-tag-l7 cursor-pointer">Cash On Delivery</label>
-                                {isCodeSelected && (
-                                <div className="mt-2">
-                                    <label className="block text-tag-l7 mb-1">Verification Code</label>
-                                    <input
-                                    type="text"
-                                    placeholder="Enter the 6-digit code"
-                                    className="w-full p-2 rounded border border-tag-l4"
-                                    value={code}
-                                    onChange={e => setCode(e.target.value)}
-                                    />
-                                </div>
-                                )}
-
-                            </div>
-                            <button 
-                            onClick = {() =>{
-                                placeOrder(userId, paymentMethod, address);
-                                verifyCode();
-                            }}
-                            className="w-full bg-tag-lp text-tag-l3 font-semibold py-2 rounded-3xl hover:bg-tag-l7 hover:text-tag-l3 ">
-                                {isCodeSelected ? "Confirm Order" : "Pay Now"}
-                            </button>
-                            </div>
+                        {isCodeSelected && !isConfirmStage && (
+                        <div className="mt-4">
+                            <label className="block text-tag-l7 mb-1">Verification Code</label>
+                            <input
+                            type="text"
+                            placeholder="Enter the 6-digit code"
+                            className="w-full p-2 rounded border border-tag-l4"
+                            value={code}
+                            onChange={(e) => setCode(e.target.value)}
+                            />
                         </div>
+                        )}
+
+
+                        <div className="mt-6">
+                            {isCodeSelected ? (
+                            isConfirmStage ? (
+                                <button
+                                onClick={() => placeOrder(userId, "COD", address)}
+                                className="w-full bg-green-600 text-white font-semibold py-2 rounded-3xl hover:bg-green-700"
+                                >
+                                Confirm Order
+                                </button>
+                            ) : (
+                                <button
+                                onClick={() => {
+                                    verifyCode();
+                                    setIsConfirmStage(true);
+                                }}
+                                className="w-full bg-tag-lp text-tag-l3 font-semibold py-2 rounded-3xl hover:bg-tag-l7 hover:text-tag-l3"
+                                >
+                                Verify Code
+                                </button>
+                            )
+                            ) : (
+                            <button
+                                onClick={() => placeOrder(userId, "Card", address)}
+                                className="w-full bg-tag-lp text-tag-l3 font-semibold py-2 rounded-3xl hover:bg-tag-l7 hover:text-tag-l3"
+                            >
+                                Pay Now
+                            </button>
+                            )}
+                        </div>
+                        </div>
+
                         )}
 
 
