@@ -1,9 +1,0 @@
-@import url("https://fonts.googleapis.com/css2?family=Great+Vibes&display=swap");
-
-.scrollbar-hide::-webkit-scrollbar {
-  display: none;
-}
-.scrollbar-hide {
-  -ms-overflow-style: none;
-  scrollbar-width: none;
-}
