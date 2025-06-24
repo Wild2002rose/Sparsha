@@ -8,6 +8,9 @@ namespace Sparsha_backend.Models
         [Key]
         [DatabaseGenerated(DatabaseGeneratedOption.Identity)]
         public int Id { get; set; }
+        public Guid? ItemId { get; set; }
+        [ForeignKey("ItemId")]
+        public Items Item { get; set; }
         public string SellerId { get; set; }
         public Seller Seller { get; set; }
         public string Name { get; set; }

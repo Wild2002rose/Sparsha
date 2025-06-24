@@ -36,6 +36,7 @@ namespace Sparsha_backend.Controllers
         {
             var items = await _itemDbContext.GlobalItems.Select(i => new
             {
+                i.ItemId,
                 i.Name,
                 i.ImagePath,
                 i.CurrentBid,
@@ -67,19 +68,6 @@ namespace Sparsha_backend.Controllers
 
             var dbPath = "/uploads/" + fileName;
 
-            var newItem = new ItemOfSellers
-            {
-                SellerId = item.SellerId,
-                Name = item.Name,
-                CategoryName = item.CategoryName,
-                Description = item.Description,
-                MyPrice = item.MyPrice,
-                ImagePath = dbPath, 
-            };
-
-            _itemDbContext.ItemOfSellers.Add(newItem);
-            await _itemDbContext.SaveChangesAsync();
-
             var publicItem = new Items
             {
                 Name = item.Name,
@@ -91,6 +79,20 @@ namespace Sparsha_backend.Controllers
             };
 
             _itemDbContext.GlobalItems.Add(publicItem);
+            await _itemDbContext.SaveChangesAsync();
+
+            var newItem = new ItemOfSellers
+            {
+                SellerId = item.SellerId,
+                Name = item.Name,
+                CategoryName = item.CategoryName,
+                Description = item.Description,
+                MyPrice = item.MyPrice,
+                ImagePath = dbPath,
+                ItemId = publicItem.ItemId
+            };
+
+            _itemDbContext.ItemOfSellers.Add(newItem);
             await _itemDbContext.SaveChangesAsync();
 
             return Ok(new { message = "Item uploaded successfully", imagePath = dbPath });
@@ -368,6 +370,42 @@ namespace Sparsha_backend.Controllers
             });
 
             return Ok(result);
+        }
+
+        [HttpPost("RaiseBid")]
+        public async Task<IActionResult> RaiseBid([FromBody] RaiseDto dto)
+        {
+            try
+            {
+                var globalItem = await _itemDbContext.GlobalItems.FindAsync(dto.ItemId);
+                if (globalItem == null)
+                    return NotFound("Item not found in GlobalItems");
+
+                if (dto.NewBid <= 0)
+                    return BadRequest("Bid must be higher than 0.");
+
+                 
+                globalItem.CurrentBid = dto.NewBid;
+
+                var sellerItem = await _itemDbContext.ItemOfSellers
+                    .FirstOrDefaultAsync(x => x.ItemId == dto.ItemId);
+                if (sellerItem != null)
+                {
+                    if (sellerItem.SellerId == dto.UserId)
+                    {
+                        return BadRequest("You can't raise bids on your own items.");
+                    }
+
+                    sellerItem.CurrentBid = dto.NewBid;
+                }
+                await _itemDbContext.SaveChangesAsync();
+
+                return Ok(new { message = "Bid updated successfully", newBid = dto.NewBid });
+            } catch(Exception ex)
+            {
+                Console.WriteLine($"RaiseBid error: {ex.Message}");
+                return StatusCode(500, "An error occured while raising bid");
+            }
         }
 
 

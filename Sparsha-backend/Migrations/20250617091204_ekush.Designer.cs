@@ -3,6 +3,7 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Sparsha_backend.Data;
 
@@ -11,9 +12,11 @@ using Sparsha_backend.Data;
 namespace Sparsha_backend.Migrations
 {
     [DbContext(typeof(ItemDbContext))]
-    partial class ItemDbContextModelSnapshot : ModelSnapshot
+    [Migration("20250617091204_ekush")]
+    partial class ekush
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -172,7 +175,7 @@ namespace Sparsha_backend.Migrations
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
-                    b.Property<Guid?>("ItemId")
+                    b.Property<Guid?>("ItemsItemId")
                         .HasColumnType("uniqueidentifier");
 
                     b.Property<int>("MyPrice")
@@ -188,7 +191,7 @@ namespace Sparsha_backend.Migrations
 
                     b.HasKey("Id");
 
-                    b.HasIndex("ItemId");
+                    b.HasIndex("ItemsItemId");
 
                     b.HasIndex("SellerId");
 
@@ -454,9 +457,9 @@ namespace Sparsha_backend.Migrations
 
             modelBuilder.Entity("Sparsha_backend.Models.ItemOfSellers", b =>
                 {
-                    b.HasOne("Sparsha_backend.Models.Items", "Item")
+                    b.HasOne("Sparsha_backend.Models.Items", "ItemsItem")
                         .WithMany("ItemOfSellers")
-                        .HasForeignKey("ItemId");
+                        .HasForeignKey("ItemsItemId");
 
                     b.HasOne("Sparsha_backend.Models.Seller", "Seller")
                         .WithMany("ItemOfSellers")
@@ -464,7 +467,7 @@ namespace Sparsha_backend.Migrations
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.Navigation("Item");
+                    b.Navigation("ItemsItem");
 
                     b.Navigation("Seller");
                 });
