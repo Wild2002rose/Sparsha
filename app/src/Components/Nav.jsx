@@ -9,6 +9,7 @@ import { useNavigate } from "react-router-dom";
 import { useAuth } from "./AuthContext";
 import {Toaster, toast} from 'react-hot-toast';
 import {motion, scale} from 'framer-motion';
+import { requestNotificationPermission } from '../firebase-messaging';
 
 function Nav() {
     const [menuOpen, setMenuOpen] = useState(false);
@@ -349,6 +350,41 @@ function Nav() {
         console.log("userName:", localStorage.getItem("userName"));
     },[]);
 
+    const detailsRef = useRef(null);
+        const [userBid, setUserBid] = useState(0);
+        const [currentBid, setCurrentBid] = useState(null);
+        const [selectItemForBid, setSelectItemForBid] = useState(null);
+    
+        useEffect(() => {
+            function handleClickOutside(event) {
+                if (detailsRef.current && !detailsRef.current.contains(event.target)) {
+                    setSelectItemForBid(null);
+                }
+            }
+    
+            document.addEventListener("mousedown", handleClickOutside);
+            return () => {
+                document.removeEventListener("mousedown", handleClickOutside);
+            };
+        }, [detailsRef]);
+
+    useEffect(() => {
+    requestNotificationPermission().then((token) => {
+      if (token) {
+        fetch("https://your-api.com/api/member/save-token", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            userId: "D4D0A6",
+            deviceToken: token,
+          }),
+        });
+      }
+    });
+    }, []);
+
     return (
         <>
         <Toaster position = "bottom-left" reverseOrder = {true} className="" toastOptions={{
@@ -662,7 +698,10 @@ function Nav() {
                             </div>
                         </div>
                         <div className="flex justify-between items-center">
-                            <button className="h-10 w-40 bg-tag-lp rounded-3xl text-tag-l2 font-semibold hover:bg-tag-l2 hover:text-tag-lp">Raise Bid</button>
+                            <button className="h-10 w-40 bg-tag-lp rounded-3xl text-tag-l2 font-semibold hover:bg-tag-l2 hover:text-tag-lp"
+                            onClick={()=> { setSelectItemForBid(i);
+                                setCurrentBid(i.currentBid);}
+                            }>Raise Bid</button>
                             <button className="h-10 w-40 bg-tag-lp rounded-3xl text-tag-l2 font-semibold hover:bg-tag-l2 hover:text-tag-lp"
                             onClick = {() => addItemToCart(userId,i.ItemId,quantity)}>Add to cart</button>
                         </div>
@@ -702,6 +741,76 @@ function Nav() {
                 </div>
             </div>
         )}
+
+        {selectItemForBid && ( 
+            <motion.div 
+                ref = {detailsRef}
+                initial={{ opacity: 0, y: 60 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.8 }}
+                viewport={{ once: true }}
+                className=" fixed md:top-40 top-20  md:h-[420px] h-[620px] md:w-[94%] w-[80%] bg-[#3A1C32] text-[#EBDDD3] accent-[#F7E7CE] dark:bg-[#EBDDD3] dark:text-[#3A1C32] md:flex grid md:gap-20 gap-0 md:p-12 p-8 mx-10">
+                    
+                    <div className="md:w-[40%] w-[63%] text-center">
+                        <motion.h1 
+                        initial={{ scale: 0.95 }}
+                        whileHover={{ scale: 1.05 }}
+                        transition={{ type: "spring", stiffness: 300 }}
+                        className="text-[#D4AF37] md:text-4xl text-3xl font-serif drop-shadow-md dark:text-[#8B0000] font-semibold md:py-4 py-2">
+                            {selectItemForBid.Name}
+                        </motion.h1>
+                        <p className="px-2 py-4"> {selectItemForBid.Description}
+                        </p>
+                        <div className="text-start mt-4 flex gap-4">
+                            <p className="w-[55%] text-lg font-bold">Current Bid: 
+                              <span className="font-semibold ml-4">₹{selectItemForBid.CurrentBid}</span> </p>
+                            <input
+                            type="number"
+                            placeholder="Enter your bid"
+                            value={userBid}
+                            onChange={(e) => setUserBid(Number(e.target.value))}
+                            className="w-[40%] px-4 py-2 border-b bg-transparent text-center h-8 "
+                            />
+
+                        </div>
+                        <div className="md:px-11 px-2 py-10 flex md:gap-20 gap-6 ">
+                            <motion.button 
+                            whileHover={{ scale: 1.05 }}
+                            className="md:w-40 w-[220px] h-12 border rounded-3xl bg-[#EBDDD3] text-[#3A1C32] font-bold dark:bg-[#3A1C32] dark:text-[#EBDDD3]">Contact Sellor</motion.button>
+                            <motion.button 
+                            whileHover={{ scale: 1.05 }}
+                            onClick={() => {
+                            const totalBid = selectItemForBid.CurrentBid + userBid;
+                            axios.post("https://localhost:7269/api/Item/RaiseBid", {
+                                itemId: selectItemForBid.ItemId,
+                                newBid: totalBid,
+                                userId: userId
+                            })
+                            .then(res => {
+                                const updated = { ...selectItemForBid, CurrentBid: res.data.newBid };
+                                setSelectItemForBid(updated);
+                                setCurrentBid(res.data.newBid);
+                                setUserBid(0);
+                                toast.success("Bid is raised successfully.",
+                                        {
+                                          duration:10000,
+                                        });
+                            })
+                            .catch(err => console.error("Bid failed", err));
+                            }}
+
+                            className="md:w-40 w-[220px] h-12 border rounded-3xl bg-[#EBDDD3] text-[#3A1C32] font-bold dark:bg-[#3A1C32] dark:text-[#EBDDD3]">Raise Bid</motion.button>
+                        </div>
+                    </div>
+                    <div className="md:w-[60%] w-[63%]  border">
+                        <motion.img src={`https://localhost:7269${selectItemForBid.ImagePath}`}
+                        className="md:h-full h-[150px] w-full"
+                        initial={{ scale: 1 }}
+                        whileHover={{ scale: 1.03 }}
+                        transition={{ duration: 0.4 }}/>
+                    </div>
+                </motion.div>
+            )}
 
         </div>
 

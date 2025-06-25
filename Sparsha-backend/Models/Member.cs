@@ -17,5 +17,7 @@ namespace Sparsha_backend.Models
         public string Role { get; set; }
         public Seller Seller { get; set; }
         public Client Client { get; set; }
+        public string? DeviceToken { get; set; }
+
     }
 }

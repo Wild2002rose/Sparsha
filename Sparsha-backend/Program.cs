@@ -1,5 +1,7 @@
 
 using System.Text;
+using FirebaseAdmin;
+using Google.Apis.Auth.OAuth2;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
@@ -62,6 +64,17 @@ namespace Sparsha_backend
                         IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes("MyStrongJwtSecretKeyWithMoreThan32Chars123!"))
                     };
                 });
+            builder.Services.AddSignalR();
+            var path = Path.Combine(Directory.GetCurrentDirectory(), "firebase-key.json");
+            if (File.Exists(path))
+            {
+                FirebaseApp.Create(new AppOptions
+                {
+                    Credential = GoogleCredential.FromFile(path)
+                });
+            }
+
+
 
             var app = builder.Build();
             app.UseCors("AllowAll");
@@ -76,6 +89,7 @@ namespace Sparsha_backend
             app.UseAuthorization();
             app.UseStaticFiles();
             app.MapControllers();
+            app.MapHub<NotificationHub>("/notificationHub");
 
             app.Run();
         }

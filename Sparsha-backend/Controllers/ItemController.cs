@@ -1,8 +1,11 @@
-﻿using Microsoft.AspNetCore.Http;
+﻿using FirebaseAdmin.Messaging;
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.SignalR;
 using Microsoft.EntityFrameworkCore;
 using Sparsha_backend.Data;
 using Sparsha_backend.Models;
+using FirebaseAdmin.Messaging;
 
 namespace Sparsha_backend.Controllers
 {
@@ -12,10 +15,12 @@ namespace Sparsha_backend.Controllers
     {
         private readonly ItemDbContext _itemDbContext;
         private readonly MailService _mailService;
-        public ItemController(ItemDbContext itemDbContext, MailService mailService)
+        private readonly IHubContext<NotificationHub> _hubContext;
+        public ItemController(ItemDbContext itemDbContext, MailService mailService, IHubContext<NotificationHub> hubContext)
         {
             _itemDbContext = itemDbContext;
             _mailService = mailService;
+            _hubContext = hubContext;
         }
 
 
@@ -377,34 +382,76 @@ namespace Sparsha_backend.Controllers
         {
             try
             {
+                Console.WriteLine("[RaiseBid] Started");
+
                 var globalItem = await _itemDbContext.GlobalItems.FindAsync(dto.ItemId);
                 if (globalItem == null)
+                {
+                    Console.WriteLine("[RaiseBid] Global item not found.");
                     return NotFound("Item not found in GlobalItems");
+                }
 
                 if (dto.NewBid <= 0)
+                {
+                    Console.WriteLine("[RaiseBid] Invalid bid amount.");
                     return BadRequest("Bid must be higher than 0.");
+                }
 
-                 
                 globalItem.CurrentBid = dto.NewBid;
 
                 var sellerItem = await _itemDbContext.ItemOfSellers
                     .FirstOrDefaultAsync(x => x.ItemId == dto.ItemId);
+
+                Console.WriteLine($"[RaiseBid] SellerItem found: {sellerItem != null}");
+
                 if (sellerItem != null)
                 {
+                    Console.WriteLine($"[RaiseBid] SellerId: {sellerItem.SellerId}, BidderId: {dto.UserId}");
+
                     if (sellerItem.SellerId == dto.UserId)
                     {
+                        Console.WriteLine("[RaiseBid] User tried to bid on their own item.");
                         return BadRequest("You can't raise bids on your own items.");
                     }
 
                     sellerItem.CurrentBid = dto.NewBid;
-                }
-                await _itemDbContext.SaveChangesAsync();
 
-                return Ok(new { message = "Bid updated successfully", newBid = dto.NewBid });
-            } catch(Exception ex)
+                    var seller = await _itemDbContext.Members.FindAsync(sellerItem.SellerId);
+                    if (seller != null && !string.IsNullOrEmpty(seller.DeviceToken))
+                    {
+                        var messageText = $"New bid of ₹{dto.NewBid} on your item '{globalItem.Name}'.";
+
+                        var pushMessage = new FirebaseAdmin.Messaging.Message()
+                        {
+                            Token = seller.DeviceToken,
+                            Notification = new FirebaseAdmin.Messaging.Notification
+                            {
+                                Title = "New Bid Alert! 🎯",
+                                Body = messageText
+                            }
+                        };
+
+                        var response = await FirebaseAdmin.Messaging.FirebaseMessaging
+                            .DefaultInstance.SendAsync(pushMessage);
+
+                        Console.WriteLine($"[RaiseBid] Push notification sent: {response}");
+                    }
+                    else
+                    {
+                        Console.WriteLine("[RaiseBid] Seller not found or missing device token.");
+                    }
+                }
+
+                Console.WriteLine("[RaiseBid] Saving changes...");
+                await _itemDbContext.SaveChangesAsync();
+                Console.WriteLine("[RaiseBid] Changes saved.");
+
+                return Ok(new { message = "Bid updated and push sent successfully", newBid = dto.NewBid });
+            }
+            catch (Exception ex)
             {
-                Console.WriteLine($"RaiseBid error: {ex.Message}");
-                return StatusCode(500, "An error occured while raising bid");
+                Console.WriteLine($"[RaiseBid] Error: {ex}");
+                return StatusCode(500, "An error occurred while raising the bid.");
             }
         }
 
