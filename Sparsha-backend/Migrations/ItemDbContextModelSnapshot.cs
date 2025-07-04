@@ -36,7 +36,7 @@ namespace Sparsha_backend.Migrations
 
                     b.HasKey("CartId");
 
-                    b.ToTable("Carts");
+                    b.ToTable("Carts", (string)null);
                 });
 
             modelBuilder.Entity("Sparsha_backend.Models.CartItems", b =>
@@ -67,7 +67,7 @@ namespace Sparsha_backend.Migrations
 
                     b.HasIndex("OrderId");
 
-                    b.ToTable("CartItems");
+                    b.ToTable("CartItems", (string)null);
                 });
 
             modelBuilder.Entity("Sparsha_backend.Models.Category", b =>
@@ -84,7 +84,7 @@ namespace Sparsha_backend.Migrations
 
                     b.HasKey("Id");
 
-                    b.ToTable("Categories");
+                    b.ToTable("Categories", (string)null);
                 });
 
             modelBuilder.Entity("Sparsha_backend.Models.Client", b =>
@@ -118,7 +118,7 @@ namespace Sparsha_backend.Migrations
 
                     b.HasKey("ClientId");
 
-                    b.ToTable("Clients");
+                    b.ToTable("Clients", (string)null);
                 });
 
             modelBuilder.Entity("Sparsha_backend.Models.ClientLoginLog", b =>
@@ -146,7 +146,7 @@ namespace Sparsha_backend.Migrations
 
                     b.HasKey("Id");
 
-                    b.ToTable("LoggedClients");
+                    b.ToTable("LoggedClients", (string)null);
                 });
 
             modelBuilder.Entity("Sparsha_backend.Models.ItemOfSellers", b =>
@@ -192,7 +192,7 @@ namespace Sparsha_backend.Migrations
 
                     b.HasIndex("SellerId");
 
-                    b.ToTable("ItemOfSellers");
+                    b.ToTable("ItemOfSellers", (string)null);
                 });
 
             modelBuilder.Entity("Sparsha_backend.Models.Items", b =>
@@ -225,7 +225,7 @@ namespace Sparsha_backend.Migrations
 
                     b.HasKey("ItemId");
 
-                    b.ToTable("GlobalItems");
+                    b.ToTable("GlobalItems", (string)null);
                 });
 
             modelBuilder.Entity("Sparsha_backend.Models.LoginLog", b =>
@@ -253,7 +253,7 @@ namespace Sparsha_backend.Migrations
 
                     b.HasKey("Id");
 
-                    b.ToTable("LoggedSellers");
+                    b.ToTable("LoggedSellers", (string)null);
                 });
 
             modelBuilder.Entity("Sparsha_backend.Models.Member", b =>
@@ -294,7 +294,7 @@ namespace Sparsha_backend.Migrations
 
                     b.HasKey("UserId");
 
-                    b.ToTable("Member");
+                    b.ToTable("Member", (string)null);
                 });
 
             modelBuilder.Entity("Sparsha_backend.Models.Notification", b =>
@@ -321,7 +321,7 @@ namespace Sparsha_backend.Migrations
 
                     b.HasKey("Id");
 
-                    b.ToTable("Notifications");
+                    b.ToTable("Notifications", (string)null);
                 });
 
             modelBuilder.Entity("Sparsha_backend.Models.Order", b =>
@@ -352,7 +352,7 @@ namespace Sparsha_backend.Migrations
 
                     b.HasKey("OrderId");
 
-                    b.ToTable("Orders");
+                    b.ToTable("Orders", (string)null);
                 });
 
             modelBuilder.Entity("Sparsha_backend.Models.OrderItem", b =>
@@ -381,7 +381,7 @@ namespace Sparsha_backend.Migrations
 
                     b.HasIndex("OrderId");
 
-                    b.ToTable("OrderItems");
+                    b.ToTable("OrderItems", (string)null);
                 });
 
             modelBuilder.Entity("Sparsha_backend.Models.Seller", b =>
@@ -423,7 +423,7 @@ namespace Sparsha_backend.Migrations
 
                     b.HasKey("SellerId");
 
-                    b.ToTable("Sellers");
+                    b.ToTable("Sellers", (string)null);
                 });
 
             modelBuilder.Entity("Sparsha_backend.Models.WishlistItems", b =>
@@ -445,7 +445,7 @@ namespace Sparsha_backend.Migrations
 
                     b.HasIndex("ItemId");
 
-                    b.ToTable("WishlistItems");
+                    b.ToTable("WishlistItems", (string)null);
                 });
 
             modelBuilder.Entity("Sparsha_backend.Models.CartItems", b =>

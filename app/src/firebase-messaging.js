@@ -23,7 +23,7 @@ export const requestNotificationPermission = async () => {
   const permission = await Notification.requestPermission();
   if (permission === "granted") {
     const token = await getToken(messaging, {
-      vapidKey: "YOUR_PUBLIC_VAPID_KEY", 
+      vapidKey: "BKA8T0TMlOVbjkLlcEuuNYpC5YVKgSSnzlxTpTqNK6TbdlasfUo1KOIKQZpmIJVggx8cbbnDifQJrcs6Bg2mb8s", 
     });
     console.log("FCM Token:", token);
     return token;
@@ -35,5 +35,9 @@ export const requestNotificationPermission = async () => {
 
 onMessage(messaging, (payload) => {
   console.log("Push received in foreground:", payload);
-  alert(`${payload.notification.title}: ${payload.notification.body}`);
+  const message = `${payload.notification.title}: ${payload.notification.body}`;
+  const event = new CustomEvent("play-notification", {
+    detail: message,
+  });
+  window.dispatchEvent(event);
 });

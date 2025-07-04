@@ -1,8 +1,9 @@
-
+﻿
 using System.Text;
 using FirebaseAdmin;
 using Google.Apis.Auth.OAuth2;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.AspNetCore.SignalR;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
 using Sparsha_backend.Data;
@@ -17,10 +18,9 @@ namespace Sparsha_backend
         {
             var builder = WebApplication.CreateBuilder(args);
 
-            // Add services to the container.
+            //Add services to the container.
 
-            builder.Services.AddControllers();
-            builder.Services.AddSingleton<TwilioService>();
+           builder.Services.AddSingleton<TwilioService>();
             builder.Services.Configure<EmailSettings>(
                 builder.Configuration.GetSection("EmailSettings")
             );
@@ -36,7 +36,8 @@ namespace Sparsha_backend
                 options.AddPolicy("AllowAll",
                     policy => policy.WithOrigins("http://localhost:3000")
                     .AllowAnyHeader()
-                    .AllowAnyMethod());
+                    .AllowAnyMethod()
+                    .AllowCredentials());
             });
             builder.Services.AddControllers().AddJsonOptions(options =>
             {
@@ -45,10 +46,11 @@ namespace Sparsha_backend
                 options.JsonSerializerOptions.WriteIndented = true;
             });
 
+            var jwtSettings = builder.Configuration.GetSection("jwt");
             builder.Services.AddAuthentication(options =>
             {
                 options.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
-                options.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
+                //options.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
             })
                 .AddJwtBearer(options =>
                 {
@@ -58,13 +60,17 @@ namespace Sparsha_backend
                         ValidateAudience = true,
                         ValidateLifetime = true,
                         ValidateIssuerSigningKey = true,
-                        ValidIssuer = "http://localhost:3000/",
-                        ValidAudience = "http://localhost:3000/",
+                        ValidIssuer = jwtSettings["Issuer"],
+                        ValidAudience = jwtSettings["Audience"],
                         RequireExpirationTime = true,
-                        IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes("MyStrongJwtSecretKeyWithMoreThan32Chars123!"))
+                        IssuerSigningKey = new SymmetricSecurityKey(
+                            Encoding.UTF8.GetBytes("MyUltraSecureJWTSecretKey!1234567890"))
                     };
                 });
+            builder.Services.AddScoped<INotificationService, NotificationService>();
             builder.Services.AddSignalR();
+            builder.Services.AddSingleton<IUserIdProvider, CustomUserIdProvider>();
+
             var path = Path.Combine(Directory.GetCurrentDirectory(), "firebase-key.json");
             if (File.Exists(path))
             {
@@ -73,6 +79,7 @@ namespace Sparsha_backend
                     Credential = GoogleCredential.FromFile(path)
                 });
             }
+
 
 
 
@@ -89,7 +96,7 @@ namespace Sparsha_backend
             app.UseAuthorization();
             app.UseStaticFiles();
             app.MapControllers();
-            app.MapHub<NotificationHub>("/notificationHub");
+            app.MapHub<NotificationHub>("/hub/notification");
 
             app.Run();
         }

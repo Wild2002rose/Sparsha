@@ -4,12 +4,14 @@ using System.Text;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.SignalR;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Identity.Client;
 using Microsoft.IdentityModel.Tokens;
 using Sparsha_backend.Data;
 using Sparsha_backend.Models;
 using Sparsha_backend.Services;
+using static Sparsha_backend.Controllers.ItemController;
 
 namespace Sparsha_backend.Controllers
 {
@@ -20,102 +22,40 @@ namespace Sparsha_backend.Controllers
         private readonly ItemDbContext _itemDbContext;
         private readonly TwilioService _twilioService;
         private readonly MailService _mailService;
+        private readonly INotificationService _notificationService;
+        private readonly IHubContext<NotificationHub> _hubContext;
+        private readonly IConfiguration _config;
 
-        public AuthController (TwilioService twilioService, ItemDbContext itemDbContext, MailService mailService)
+        public AuthController(
+            TwilioService twilioService,
+            ItemDbContext itemDbContext,
+            MailService mailService,
+            INotificationService notificationService,
+            IHubContext<NotificationHub> hubContext,
+            IConfiguration config)
         {
             _itemDbContext = itemDbContext;
             _twilioService = twilioService;
             _mailService = mailService;
+            _notificationService = notificationService;
+            _hubContext = hubContext;
+            _config = config;
         }
 
-        //[HttpPost("Send_Otp")]
-        //public async Task<IActionResult> SendOtp([FromBody] GetOtp request)
-        //{
-        //    if (request == null || string.IsNullOrWhiteSpace(request.MobileNumber))
-        //    {
-        //        return BadRequest("Mobile number is required");
-        //    }
-        //    try
-        //    {
-        //        var result = await _twilioService.SendOtpAsync(request.MobileNumber, "Your OTP for Astha registration");
-        //        if (!string.IsNullOrEmpty(result))
-        //        {
-        //            return Ok(new { msg = "OTP sent to your mobile number" });
-        //        }
-        //        return StatusCode(500, "Failed to send OTP");
-        //    }
-        //    catch (Exception ex)
-        //    {
-        //        return StatusCode(500, $"Error sending OTP:{ex.Message}");
-        //    }
-        //}
-
-
-        //[HttpPost("Verify_Otp")]
-        //public async Task<IActionResult> VerifyOtp([FromBody] VerifyOtp request)
-        //{
-        //    if(request == null || string.IsNullOrWhiteSpace(request.MobileNumber) || string.IsNullOrWhiteSpace(request.Otp))
-        //    {
-        //        return BadRequest("Mobile Number and Otp are not valid.");
-        //    }
-        //    try
-        //    {
-        //        bool isVerified = await _twilioService.VerifyOtpAsync(request.MobileNumber, request.Otp);
-        //        if (isVerified)
-        //        {
-        //            return Ok(new { msg = "OTP verified successfully" });
-        //        }
-        //        else
-        //        {
-        //            return BadRequest(new {msg= "OTP is invalid or Expired OTP" });
-        //        }
-        //    }
-        //    catch(Exception ex)
-        //    {
-        //        return StatusCode(500, $"Error verifying OTP: {ex.Message}");
-        //    }
-        //}
-
-        //[HttpPost("Register")]
-        //public async Task<IActionResult> Register([FromBody] Register request)
-        //{
-        //    if (request == null)
-        //    {
-        //        return BadRequest("Invalid Data");
-        //    }
-        //    if (request.Password != request.ConfirmPassword)
-        //    {
-        //        return BadRequest("Passwords do not match.");
-        //    }
-        //    try
-        //    {
-
-        //        string hashedPassword = BCrypt.Net.BCrypt.HashPassword(request.Password);
-        //        var member = new Member { 
-        //            FirstName = request.FirstName, 
-        //            LastName = request.LastName, 
-        //            Email = request.Email, 
-        //            MobileNumber = request.MobileNumber, 
-        //            Password = hashedPassword,
-        //            Address = request.Address,
-        //        };
-        //        await _itemDbContext.Members.AddAsync(member);
-        //        await _itemDbContext.SaveChangesAsync();
-
-        //        await _twilioService.SendSmsAsync(request.MobileNumber,
-        //            $"Your registratoin is successful. Welcome to our Sparsha Family!");
-
-        //        return Ok(new {message= "User registered successfully" });
-        //    }
-        //    catch (Exception ex)
-        //    {
-        //        if(ex.InnerException != null)
-        //        {
-        //            return StatusCode(500, $"Error during registration: {ex.InnerException.Message}");
-        //        }
-        //        return StatusCode(500, $"Error during registration: {ex.Message}");
-        //    }
-        //}
+        [HttpPost("save-token")]
+        //[Authorize]
+        public async Task<IActionResult> SaveToken([FromBody] DeviceTokenDto dto)
+        {
+            //var userId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+            //if (string.IsNullOrEmpty(userId))
+            //    return Unauthorized();
+            var user = await _itemDbContext.Members.FirstOrDefaultAsync(
+                m => m.UserId == dto.UserId);
+            if (user == null) return NotFound();
+            user.DeviceToken = dto.DeviceToken;
+            await _itemDbContext.SaveChangesAsync();
+            return Ok("✅ Device token saved");
+        }
 
         [HttpPost("sendCode")]
         public async Task<IActionResult> SendCode([FromBody] EmailRequest request)
@@ -127,10 +67,10 @@ namespace Sparsha_backend.Controllers
 
                 return StatusCode(500, new { message = "Failed to send email." });
             }
-            catch(Exception ex)
+            catch (Exception ex)
             {
                 Console.WriteLine($"SMTP ERROR: {ex}");
-                return StatusCode(500, new {message = "Internal server error"});
+                return StatusCode(500, new { message = "Internal server error" });
             }
         }
 
@@ -146,18 +86,18 @@ namespace Sparsha_backend.Controllers
         [HttpPost("RegisterSeller")]
         public async Task<IActionResult> RegisterSeller([FromBody] SellerReg request)
         {
-            if(request == null)
+            if (request == null)
             {
                 return BadRequest("Invalid Data");
             }
-            if(request.Password != request.ConfirmPassword)
+            if (request.Password != request.ConfirmPassword)
             {
                 return BadRequest("Passwords do not match.");
             }
             try
             {
                 var existingSeller = await _itemDbContext.Sellers.FirstOrDefaultAsync(s => s.Email == request.Email);
-                if(existingSeller != null)
+                if (existingSeller != null)
                 {
                     return BadRequest("A user with this email already exists.");
                 }
@@ -197,9 +137,9 @@ namespace Sparsha_backend.Controllers
             }
             catch (Exception ex)
             {
-                if(ex.InnerException != null)
+                if (ex.InnerException != null)
                 {
-                    return StatusCode(500, $"Error during registration :{ ex.InnerException.Message}");
+                    return StatusCode(500, $"Error during registration :{ex.InnerException.Message}");
                 }
                 return StatusCode(500, $"Error during registration:{ex.Message}");
             }
@@ -216,7 +156,7 @@ namespace Sparsha_backend.Controllers
             try
             {
                 var existingClient = await _itemDbContext.Members.FirstOrDefaultAsync(m => m.Email == request.Email);
-                if(existingClient != null)
+                if (existingClient != null)
                     return BadRequest("A user with this email already exists.");
                 string clientId = Guid.NewGuid().ToString().Substring(0, 6).ToUpper();
                 string hashedPassword = BCrypt.Net.BCrypt.HashPassword(request.Password);
@@ -281,20 +221,28 @@ namespace Sparsha_backend.Controllers
             _itemDbContext.LoggedSellers.Add(log);
             await _itemDbContext.SaveChangesAsync();
 
+            await _notificationService.SendAsync(new SendNotificationDto
+            {
+                OwnerId = seller.SellerId,
+                Title = "You logged in",
+                Body = $"Welcome back ,{seller.Name}",
+                Type = "Login"
+            });
+            await _hubContext.Clients.User(seller.SellerId).SendAsync("ReciedNotification", $"🔐 Hello {seller.Name}, you're now logged in!");
 
             var tokenHandler = new JwtSecurityTokenHandler();
-            var key = Encoding.UTF8.GetBytes("MyUltraSecureJWTSecretKey!1234567890");
+            var key = Encoding.UTF8.GetBytes(_config["Jwt:Key"]);
             var tokenDescriptor = new SecurityTokenDescriptor
             {
                 Subject = new ClaimsIdentity(new[]
                 {
-            new Claim("SellerId", seller.SellerId),
-            new Claim(ClaimTypes.Name, seller.Name),
-            new Claim(ClaimTypes.Email, seller.Email)
-        }),
+                    new Claim("SellerId", seller.SellerId),
+                    new Claim(ClaimTypes.Name, seller.Name),
+                    new Claim(ClaimTypes.Email, seller.Email)
+                }),
                 Expires = DateTime.UtcNow.AddHours(24),
-                Issuer = "yourdomain.com",
-                Audience = "yourdomain.com",
+                Issuer = _config["Jwt:Issuer"],
+                Audience = _config["Jwt:Audience"],
                 SigningCredentials = new SigningCredentials(
                     new SymmetricSecurityKey(key), SecurityAlgorithms.HmacSha256Signature)
             };
@@ -304,7 +252,7 @@ namespace Sparsha_backend.Controllers
 
             return Ok(new
             {
-                token,
+                token = jwt,
                 sellerId = seller.SellerId,
                 name = seller.Name,
                 email = seller.Email
@@ -334,20 +282,28 @@ namespace Sparsha_backend.Controllers
             _itemDbContext.LoggedClients.Add(log);
             await _itemDbContext.SaveChangesAsync();
 
+            await _notificationService.SendAsync(new SendNotificationDto
+            {
+                OwnerId = client.ClientId,
+                Title = "You logged in",
+                Body = $"Welcome back ,{client.Name}",
+                Type = "Login"
+            });
+            await _hubContext.Clients.User(client.ClientId).SendAsync("ReciedNotification", $"🔐 Hello {client.Name}, you're now logged in!");
 
             var tokenHandler = new JwtSecurityTokenHandler();
-            var key = Encoding.UTF8.GetBytes("MyUltraSecureJWTSecretKey!1234567890");
+            var key = Encoding.UTF8.GetBytes(_config["Jwt:Key"]);
             var tokenDescriptor = new SecurityTokenDescriptor
             {
                 Subject = new ClaimsIdentity(new[]
                 {
-            new Claim("ClientId", client.ClientId),
-            new Claim(ClaimTypes.Name, client.Name),
-            new Claim(ClaimTypes.Email, client.Email)
-        }),
+                    new Claim("ClientID", client.ClientId),
+                    new Claim(ClaimTypes.Name, client.Name),
+                    new Claim(ClaimTypes.Email, client.Email)
+                }),
                 Expires = DateTime.UtcNow.AddHours(24),
-                Issuer = "yourdomain.com",
-                Audience = "yourdomain.com",
+                Issuer = _config["Jwt:Issuer"],
+                Audience = _config["Jwt:Audience"],
                 SigningCredentials = new SigningCredentials(
                     new SymmetricSecurityKey(key), SecurityAlgorithms.HmacSha256Signature)
             };
@@ -357,7 +313,7 @@ namespace Sparsha_backend.Controllers
 
             return Ok(new
             {
-                token,
+                token = jwt,
                 clientId = client.ClientId,
                 name = client.Name,
                 email = client.Email
@@ -369,7 +325,7 @@ namespace Sparsha_backend.Controllers
         {
             var member = await _itemDbContext.Members
                 .FindAsync(userId);
-            if(member == null)
+            if (member == null)
             {
                 return NotFound("Member not found");
             }
@@ -393,12 +349,29 @@ namespace Sparsha_backend.Controllers
             var user = await _itemDbContext.Sellers
                 .AsNoTracking()
                 .FirstOrDefaultAsync(u => u.SellerId == userId);
-            if(user == null)
+            if (user == null)
             {
                 return NotFound(new { message = "user not found" });
             }
             return Ok(new { email = user.Email });
         }
+
+        [HttpGet("GetNotification/{userId}")]
+        public async Task<IActionResult> GetNotification(string userId)
+        {
+            var notifications = await _itemDbContext.Notifications
+                .Where(n => n.OwnerId == userId)
+                .OrderByDescending(n => n.CreatedAt)
+                .ToListAsync();
+
+            if (notifications == null || !notifications.Any())
+            {
+                return NotFound(new { message = "No notifications found" });
+            }
+
+            return Ok(notifications); 
+        }
+
 
 
     }

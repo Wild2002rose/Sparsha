@@ -6,6 +6,10 @@ using Microsoft.EntityFrameworkCore;
 using Sparsha_backend.Data;
 using Sparsha_backend.Models;
 using FirebaseAdmin.Messaging;
+using Notification = Sparsha_backend.Models.Notification;
+using Sparsha_backend.Services;
+using Microsoft.AspNetCore.Authorization;
+using System.Security.Claims;
 
 namespace Sparsha_backend.Controllers
 {
@@ -15,14 +19,28 @@ namespace Sparsha_backend.Controllers
     {
         private readonly ItemDbContext _itemDbContext;
         private readonly MailService _mailService;
+        private readonly INotificationService _notificationService;
         private readonly IHubContext<NotificationHub> _hubContext;
-        public ItemController(ItemDbContext itemDbContext, MailService mailService, IHubContext<NotificationHub> hubContext)
+        public ItemController(ItemDbContext itemDbContext, MailService mailService, INotificationService notificationService, IHubContext<NotificationHub> hubContext)
         {
             _itemDbContext = itemDbContext;
             _mailService = mailService;
+            _notificationService = notificationService;
             _hubContext = hubContext;
         }
 
+        
+        public class DeviceTokenDto
+        {
+            public string UserId { get; set; }
+            public string DeviceToken { get; set; }
+        }
+
+        [HttpPost("SendLoginNotification")]
+        public async Task SendLoginNotification(string userId, string message)
+        {
+            await _hubContext.Clients.User(userId).SendAsync("ReceiveNotification", message);
+        }
 
         [HttpGet("GetCategory")]
         public async Task<IActionResult> GetCategories()
@@ -81,6 +99,7 @@ namespace Sparsha_backend.Controllers
                 Price = item.MyPrice,
                 CurrentBid = item.CurrentBid,
                 ImagePath = dbPath,
+                IsFixedPrice = item.IsFixedPrice
             };
 
             _itemDbContext.GlobalItems.Add(publicItem);
@@ -94,7 +113,8 @@ namespace Sparsha_backend.Controllers
                 Description = item.Description,
                 MyPrice = item.MyPrice,
                 ImagePath = dbPath,
-                ItemId = publicItem.ItemId
+                ItemId = publicItem.ItemId,
+                IsFixedPrice = item.IsFixedPrice
             };
 
             _itemDbContext.ItemOfSellers.Add(newItem);
@@ -377,83 +397,71 @@ namespace Sparsha_backend.Controllers
             return Ok(result);
         }
 
+
         [HttpPost("RaiseBid")]
         public async Task<IActionResult> RaiseBid([FromBody] RaiseDto dto)
         {
             try
             {
-                Console.WriteLine("[RaiseBid] Started");
-
                 var globalItem = await _itemDbContext.GlobalItems.FindAsync(dto.ItemId);
                 if (globalItem == null)
-                {
-                    Console.WriteLine("[RaiseBid] Global item not found.");
-                    return NotFound("Item not found in GlobalItems");
-                }
+                    return NotFound("Item not found");
+                if (globalItem.IsFixedPrice)
+                    return BadRequest("Bidding is not allowed on fixed-price items.");
 
                 if (dto.NewBid <= 0)
-                {
-                    Console.WriteLine("[RaiseBid] Invalid bid amount.");
-                    return BadRequest("Bid must be higher than 0.");
-                }
+                    return BadRequest("Bid must be greater than 0");
 
-                globalItem.CurrentBid = dto.NewBid;
-
+                globalItem.CurrentBid = (globalItem.CurrentBid ?? 0) + dto.NewBid;
                 var sellerItem = await _itemDbContext.ItemOfSellers
                     .FirstOrDefaultAsync(x => x.ItemId == dto.ItemId);
-
-                Console.WriteLine($"[RaiseBid] SellerItem found: {sellerItem != null}");
-
-                if (sellerItem != null)
+                if (sellerItem == null)
                 {
-                    Console.WriteLine($"[RaiseBid] SellerId: {sellerItem.SellerId}, BidderId: {dto.UserId}");
-
-                    if (sellerItem.SellerId == dto.UserId)
-                    {
-                        Console.WriteLine("[RaiseBid] User tried to bid on their own item.");
-                        return BadRequest("You can't raise bids on your own items.");
-                    }
-
-                    sellerItem.CurrentBid = dto.NewBid;
-
-                    var seller = await _itemDbContext.Members.FindAsync(sellerItem.SellerId);
-                    if (seller != null && !string.IsNullOrEmpty(seller.DeviceToken))
-                    {
-                        var messageText = $"New bid of ₹{dto.NewBid} on your item '{globalItem.Name}'.";
-
-                        var pushMessage = new FirebaseAdmin.Messaging.Message()
-                        {
-                            Token = seller.DeviceToken,
-                            Notification = new FirebaseAdmin.Messaging.Notification
-                            {
-                                Title = "New Bid Alert! 🎯",
-                                Body = messageText
-                            }
-                        };
-
-                        var response = await FirebaseAdmin.Messaging.FirebaseMessaging
-                            .DefaultInstance.SendAsync(pushMessage);
-
-                        Console.WriteLine($"[RaiseBid] Push notification sent: {response}");
-                    }
-                    else
-                    {
-                        Console.WriteLine("[RaiseBid] Seller not found or missing device token.");
-                    }
+                    Console.WriteLine("Seller item not found");
                 }
+                else
+                {
+                    if (sellerItem.SellerId == dto.UserId)
+                        return BadRequest("You can't bid on your own item");
+                    sellerItem.CurrentBid += dto.NewBid;
 
-                Console.WriteLine("[RaiseBid] Saving changes...");
+                    await _notificationService.SendAsync(new SendNotificationDto
+                    {
+                        OwnerId = sellerItem.SellerId,
+                        Title = "New Bid Alert! 🎯",
+                        Body = $"New bid of ₹{dto.NewBid} on your item '{globalItem.Name}'.",
+                        Type = "bid",
+                        Data = new Dictionary<string, string>
+                        {
+                            { "itemId", dto.ItemId.ToString() },
+                            { "newBid", dto.NewBid.ToString() }
+                        }
+                    });
+                    await _hubContext.Clients.User(sellerItem.SellerId)
+                    .SendAsync("ReceiveNotification", $"💰 New bid of ₹{dto.NewBid} on your item '{globalItem.Name}'");
+                }
                 await _itemDbContext.SaveChangesAsync();
-                Console.WriteLine("[RaiseBid] Changes saved.");
-
-                return Ok(new { message = "Bid updated and push sent successfully", newBid = dto.NewBid });
+                Console.WriteLine("Adding notification...");
+                return Ok(new { message = "Bid placed", newBid = dto.NewBid });
             }
             catch (Exception ex)
             {
-                Console.WriteLine($"[RaiseBid] Error: {ex}");
-                return StatusCode(500, "An error occurred while raising the bid.");
+                Console.WriteLine($"RaiseBid error: {ex.Message}");
+                return StatusCode(500, "Internal server error");
             }
         }
+
+        [HttpGet("FixedPriceItems")]
+        public async Task<IActionResult> GetFixedPriceItems()
+        {
+            var items = await _itemDbContext.GlobalItems
+                .Where(i => i.IsFixedPrice)
+                .ToListAsync();
+
+            return Ok(items);
+        }
+
+
 
 
 

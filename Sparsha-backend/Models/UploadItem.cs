@@ -16,5 +16,6 @@ namespace Sparsha_backend.Models
         public IFormFile Image { get; set; }
         [NotMapped]
         public string? ImagePath { get; set; }
+        public bool IsFixedPrice { get; set; }
     }
 }

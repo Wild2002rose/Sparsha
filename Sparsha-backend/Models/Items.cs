@@ -12,6 +12,7 @@ namespace Sparsha_backend.Models
         public string Description { get; set; }
         public int Price { get; set; }
         public int? CurrentBid { get; set; }
+        public bool IsFixedPrice { get; set; }
         public string ImagePath { get; set; }
         public ICollection<ItemOfSellers> ItemOfSellers { get; set; }
     }

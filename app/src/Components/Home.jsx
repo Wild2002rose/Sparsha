@@ -10,10 +10,12 @@ import light1 from "../Assets/l1.avif";
 import m1 from "../Assets/m1.jpg";
 import mc1 from "../Assets/mc1.jpg";
 import p1 from "../Assets/p1.avif";
-import { motion } from "framer-motion";
+import { motion, AnimatePresence, delay } from "framer-motion";
 import axios from "axios";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "./AuthContext";
+import { requestNotificationPermission } from "../firebase-messaging"; // path must match your filename
+import * as signalR from '@microsoft/signalr';
 
 import f2 from "../Assets/f2.jpg";
 import j2 from "../Assets/j2.jpg";
@@ -32,6 +34,21 @@ import Item from "./Item";
 import End from "./End";
 
 function Home() {
+  const itemVariants = {
+    hidden: { opacity: 0, y: 30, scale: 0.95 },
+    visible: (i) => ({
+      opacity: 1,
+      y: 0,
+      scale: 1,
+      transition: {
+        delay: i * 0.1,
+        duration: 0.5,
+        type: "spring",
+        stiffness: 80,
+      },
+    }),
+    exit: { opacity: 0, x: -50, scale: 0.9 },
+  };
   const dropDownRef = useRef(null);
   const [error, setError] = useState('');
   const [email, setEmail] = useState('');
@@ -51,22 +68,14 @@ function Home() {
   const [inputPassword, setInputPassword] = useState("");
   const [showRegister, setShowRegister] = useState(false);
   const [showLogin, setShowLogin] = useState(false);
-  useEffect(() => {
-          const storedUserId = localStorage.getItem("userId");
-          if(storedUserId){
-              setUserId(storedUserId);
-          }
-          console.log("userId:", localStorage.getItem("userId"));
-      },[]);
+  const {login} = useAuth();
   const navigate = useNavigate();
   const registerLink = () => {
     setShowRegister(true);
   }
-
   const loginLink = () => {
     setShowLogin(true);
   }
-
   const handleGetCode = async () => {
     try {
       const response = await axios.post('https://localhost:7269/api/Auth/sendCode', {
@@ -83,7 +92,6 @@ function Home() {
       setError('Failed to send Code');
     }
   }
-
   const handleVerifyCode = async () =>{
     try {
       const response = await axios.post('https://localhost:7269/api/Auth/checkCode', {
@@ -100,7 +108,6 @@ function Home() {
     }
 
   };
-
   const handleSubmit = async (e) => {
     e.preventDefault();
     if(password != confirmPassword){
@@ -129,7 +136,6 @@ function Home() {
       setError(error.response?.data?.message || "Something went wrong!");
     }
   }
-  const {login} = useAuth();
   const handleLogSubmit = async (e) => {
     e.preventDefault();
     const loginData = {sellerId, password};
@@ -140,7 +146,8 @@ function Home() {
           'Content-Type' : 'application/json',
         },
       });
-      login( response.data.name,response.data.sellerId, "Seller");
+      const {  sellerId, name } = response.data;
+      login( sellerId, name, "Seller");
       setError('');
       toast.success("Logged in successfully",{
         duration: 5000,
@@ -154,8 +161,6 @@ function Home() {
       setError(errorMsg);
     }
   }
-
-
   useEffect(() => {
     function handleClickOutside(event) {
       if(dropDownRef.current && !dropDownRef.current.contains(event.target))
@@ -168,7 +173,6 @@ function Home() {
     document.addEventListener('mousedown', handleClickOutside);
     return () => document.removeEventListener('mousedown', handleClickOutside);
   },[]);
-
   const items = [
     { id: 1, src: clock1 },
     { id: 2, src: decor1 },
@@ -179,7 +183,6 @@ function Home() {
     { id: 7, src: p1 },
     { id: 8, src: jwellery1 },
   ];
-
   const cats = [
     { id: 1, src: f2, name: "Furniture" },
     { id: 2, src: j2, name: "Jewelry & Accessories" },
@@ -196,7 +199,6 @@ function Home() {
   ];
 
   const [visibleGroup, setVisibleGroup] = useState(0); 
-
   useEffect(() => {
     const interval = setInterval(() => {
       setVisibleGroup((prev) => (prev === 0 ? 1 : 0)); 
@@ -206,7 +208,6 @@ function Home() {
   }, []);
 
   const visibleItems = items.slice(visibleGroup * 4, visibleGroup * 4 + 4);
-
   const [visibleCat, setVisibleCat] = useState(0);
   useEffect (() => {
     const interval = setInterval(() => {
@@ -216,14 +217,12 @@ function Home() {
   },[]);
 
   const visibleCats = cats.slice(visibleCat * 6, visibleCat * 6 + 6);
-  
   const handleLogout = () => {
   localStorage.removeItem("name");
   localStorage.removeItem("role");
   localStorage.removeItem("userId");
   navigate("/");
 };
-
 
     const [globalItems, setGlobalItems] = useState([]);
     const [selectedCategory, setSelectedCategory] = useState('');
@@ -398,6 +397,47 @@ function Home() {
             document.removeEventListener("mousedown", handleClickOutside);
         };
     }, [detailsRef]);
+    
+    const bellRef = useRef();
+
+  useEffect(() => {
+    const handleNotification = (e) => {
+      const msg = e.detail;
+      const audio = new Audio("/notification.mp3");
+      audio.volume = 1.0;
+      audio.play().catch(err => console.warn("🔇 Sound error:", err));
+
+      if (bellRef.current) {
+        bellRef.current.classList.add("animate-ping-bell");
+        setTimeout(() => bellRef.current.classList.remove("animate-ping-bell"), 3000);
+      }
+    };
+
+    window.addEventListener("play-notification", handleNotification);
+    return () => window.removeEventListener("play-notification", handleNotification);
+  }, []);
+
+const [notifications, setNotifications] = useState([]);
+const [showNotifications, setShowNotifications] = useState(false);
+const fetchNotifications = async (userId) => {
+  try {
+    const res = await axios.get(`https://localhost:7269/api/Auth/GetNotification/${userId}`);
+    setNotifications(res.data);
+    console.log(res.data);
+  } catch (err) {
+    console.error("❌ Error fetching notifications:", err);
+  }
+};
+useEffect(() => {
+  const userId = localStorage.getItem("userId");
+  if (userId) {
+    fetchNotifications(userId); 
+  } else {
+    console.warn("⚠️ No valid userId in localStorage");
+  }
+}, []);
+
+  
 
   return (
     <>
@@ -514,7 +554,16 @@ function Home() {
           {!isCodeVerified ? (  
         <> 
         {!isCodeSent ? ( 
-        <div ref = {dropDownRef}
+        <motion.div ref = {dropDownRef}
+        initial={{ opacity: 0, y: -20, scale: 0.95, rotateX: -10 }}
+        animate={{ opacity: 1, y: 0, scale: 1, rotateX: 0 }}
+        exit={{ opacity: 0, y: -20, scale: 0.95, rotateX: -10 }}
+        transition={{
+          type: "spring",
+          stiffness: 300,
+          damping: 25,
+          duration: 0.4
+        }}
         className="fixed dark:bg-pink-100 bg-tag-l3 border dark:border-pink-400 border-tag-l4  md:h-[670px] h-[660px] 
         md:w-[500px] w-[380px] md:ml-[35%] ml-9 md:top-[120px] top-20 rounded-lg z-50 p-10 grid gap-4">
           
@@ -597,7 +646,7 @@ function Home() {
             </h1>
           </div>
 
-        </div>
+        </motion.div>
         ) : (
           <div className="fixed dark:bg-pink-100 bg-tag-l3 border dark:border-pink-400 border-tag-l4  md:h-[210px] h-[190px] 
         md:w-[500px] w-[380px] md:ml-[35%] ml-9 md:top-80 top-60 rounded-lg z-50 p-10 grid gap-4">
@@ -655,7 +704,17 @@ function Home() {
       )}
 
       {showLogin && (
-        <div ref={dropDownRef} className="fixed dark:bg-pink-100 bg-tag-l3 border dark:border-pink-400 border-tag-l4  md:h-[320px] h-[320px] 
+        <motion.div 
+        initial={{ opacity: 0, y: -20, scale: 0.95, rotateX: -10 }}
+        animate={{ opacity: 1, y: 0, scale: 1, rotateX: 0 }}
+        exit={{ opacity: 0, y: -20, scale: 0.95, rotateX: -10 }}
+        transition={{
+          type: "spring",
+          stiffness: 300,
+          damping: 25,
+          duration: 0.4
+        }}
+        ref={dropDownRef} className="fixed dark:bg-pink-100 bg-tag-l3 border dark:border-pink-400 border-tag-l4  md:h-[320px] h-[320px] 
         md:w-[500px] w-[380px] md:ml-[35%] ml-9 md:top-[280px] top-60 rounded-lg z-50 p-10 ">
 
           <form className="grid gap-4" onSubmit={handleLogSubmit}>
@@ -686,14 +745,21 @@ function Home() {
                 text-tag-dark h-10 w-40 rounded-2xl md:ml-[35%] ml-[24%] font-bold text-lg dark:hover:text-tag-dark hover:text-tag-lp">Log In</button>
           </div>
           </form>
-        </div>
+        </motion.div>
       )}
 
-      <button
-        className="fixed md:top-[100px] top-[100px] left-5  p-3 rounded-full shadow-lg transition"
-        // onClick={() => alert('Notifications')}
+      <button 
+      ref = {bellRef} 
+      className="fixed md:top-[100px] top-[100px] left-5  p-3 rounded-full shadow-lg transition"
       >
-        <FaBell className="h-5 w-5 dark:text-tag-l2 text-dark dark:hover:text-tag-lp hover:text-tag-lp animate-ring" />
+        <FaBell 
+        id="notification-bell"
+        onClick={() => {
+        console.log("🔔 userId:", userId);
+      setShowNotifications(!showNotifications);
+      fetchNotifications(userId); 
+      }}
+        className="h-5 w-5 dark:text-tag-l2 text-dark dark:hover:text-tag-lp hover:text-tag-lp animate-ring" />
       </button>
 
       {showItems && (
@@ -720,7 +786,6 @@ function Home() {
                                   </p>
                               <div className="flex justify-between items-center">
                                   <div className="grid md:py-6 py-4">
-                                  <p className="text-tag-dark dark:text-tag-l2 font-bold md:py-2">My Price: <span className="text-tag-lp"> ₹ {i.Price}</span></p>
                                   <p className="text-tag-dark dark:text-tag-l2 font-bold">Current Bid: <span className="text-tag-lp"> ₹ {i.CurrentBid}</span></p>
                                   </div>
                                   <div>
@@ -781,8 +846,6 @@ function Home() {
                       </div>
                   </div>
               )}
-
-      
       
       {selectItemForBid && ( 
             <motion.div 
@@ -853,6 +916,41 @@ function Home() {
                     </div>
                 </motion.div>
             )}
+
+      {showNotifications && (
+        <div className="fixed top-[160px] left-5 bg-white p-4 rounded shadow-lg z-50 w-[300px]">
+          {notifications.length === 0 ? (
+            <p>No notifications</p>
+          ) : (
+            <ul>
+              <AnimatePresence>
+                {notifications.map((n,index) => (
+                <motion.li 
+                key={n.Id} 
+                custom={index}
+                variants={itemVariants}
+            initial="hidden"
+            animate="visible"
+            exit="exit"
+                className=" mb-2 shadow-lg h-12 w-[260px] border-gray-100 grid gap-0 ">
+                  <h1 className="text-sm mx-4 text-black font-semibold">
+                    {n.Message} 
+                  </h1>
+                  <h1 className="mx-4 flex justify-center gap-[100px]">
+                    <span className="text-xs text-gray-500">
+                    {n.CreatedAt.slice(0,10)}
+                    </span>
+                    <span className="text-xs text-gray-500">
+                      {n.CreatedAt.slice(11,19)}
+                    </span>
+                  </h1>
+                </motion.li>
+              ))}
+              </AnimatePresence>
+            </ul>
+          )}
+        </div>
+      )}
 
     </>
   );

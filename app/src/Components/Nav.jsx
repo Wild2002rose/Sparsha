@@ -8,7 +8,7 @@ import {Link} from 'react-router-dom';
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "./AuthContext";
 import {Toaster, toast} from 'react-hot-toast';
-import {motion, scale} from 'framer-motion';
+import {motion, scale, AnimatePresence} from 'framer-motion';
 import { requestNotificationPermission } from '../firebase-messaging';
 
 function Nav() {
@@ -306,7 +306,8 @@ function Nav() {
             'Content-Type' : 'application/json',
             },
         });
-        login( response.data.name,response.data.sellerId, "Client");
+        const {  clientId, name } = response.data;
+        login( clientId, name, "Client");
         setError('');
         toast.success("Logged in successfully",{
             duration: 5000,
@@ -345,7 +346,6 @@ function Nav() {
         if(storedName) {
             setUserName (storedName);
         }
-        
         console.log("userId:", localStorage.getItem("userId"));
         console.log("userName:", localStorage.getItem("userName"));
     },[]);
@@ -361,29 +361,12 @@ function Nav() {
                     setSelectItemForBid(null);
                 }
             }
-    
             document.addEventListener("mousedown", handleClickOutside);
             return () => {
                 document.removeEventListener("mousedown", handleClickOutside);
             };
         }, [detailsRef]);
 
-    useEffect(() => {
-    requestNotificationPermission().then((token) => {
-      if (token) {
-        fetch("https://your-api.com/api/member/save-token", {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify({
-            userId: "D4D0A6",
-            deviceToken: token,
-          }),
-        });
-      }
-    });
-    }, []);
 
     return (
         <>
@@ -524,7 +507,17 @@ function Nav() {
         )}
 
         {showRegister && (
-            <div ref={dropDownRef}
+            <AnimatePresence>
+            <motion.div ref={dropDownRef}
+            initial={{ opacity: 0, y: -20, scale: 0.95, rotateX: -10 }}
+            animate={{ opacity: 1, y: 0, scale: 1, rotateX: 0 }}
+            exit={{ opacity: 0, y: -20, scale: 0.95, rotateX: -10 }}
+            transition={{
+                type: "spring",
+                stiffness: 300,
+                damping: 25,
+                duration: 0.4
+            }}
             className =" fixed dark:bg-pink-100 bg-tag-l3 border dark:border-pink-400 border-tag-l4 h-auto md:w-[600px] w-[380px] md:ml-[28%] 
             ml-0 md:top-40 top-20 rounded-lg z-50 p-10 grid gap-4">
 
@@ -606,11 +599,21 @@ function Nav() {
                 </>
                 )}
 
-            </div>
+            </motion.div>
+            </AnimatePresence>
         )}
 
         {showLogin && (
-            <div ref={dropDownRef}
+            <motion.div ref={dropDownRef}
+            initial={{ opacity: 0, y: -20, scale: 0.95, rotateX: -10 }}
+            animate={{ opacity: 1, y: 0, scale: 1, rotateX: 0 }}
+            exit={{ opacity: 0, y: -20, scale: 0.95, rotateX: -10 }}
+            transition={{
+                type: "spring",
+                stiffness: 300,
+                damping: 25,
+                duration: 0.4
+            }}
             className="fixed md:h-[280px] h-[280px] md:w-[400px] w-[350px] dark:bg-pink-100 bg-tag-l3 p-10 
             md:top-80 top-60 md:ml-[34%] ml-0 rounded-lg border dark:border-pink-400 border-tag-l4 z-50">
                 <div >
@@ -633,7 +636,7 @@ function Nav() {
                 <div className="text-tag-dark mt-2 text-center">
                     <h1 >Not have an account? <span className="text-tag-lp font-semibold cursor-pointer"> Register Here</span></h1>
                 </div>
-            </div>
+            </motion.div>
         )}
 
         {showCategories && (
@@ -681,7 +684,6 @@ function Nav() {
                             </p>
                         <div className="flex justify-between items-center">
                             <div className="grid md:py-6 py-4">
-                            <p className="text-tag-dark dark:text-tag-l2 font-bold md:py-2">My Price: <span className="text-tag-lp"> ₹ {i.Price}</span></p>
                             <p className="text-tag-dark dark:text-tag-l2 font-bold">Current Bid: <span className="text-tag-lp"> ₹ {i.CurrentBid}</span></p>
                             </div>
                             <div>
@@ -692,16 +694,16 @@ function Nav() {
                             }`}
                             onClick={() =>{ 
                                 toggleWishlist(i.ItemId); 
-                                // addToWishlist(i.ItemId);
                             }}
                             />
                             </div>
                         </div>
                         <div className="flex justify-between items-center">
                             <button className="h-10 w-40 bg-tag-lp rounded-3xl text-tag-l2 font-semibold hover:bg-tag-l2 hover:text-tag-lp"
-                            onClick={()=> { setSelectItemForBid(i);
-                                setCurrentBid(i.currentBid);}
-                            }>Raise Bid</button>
+                            onClick={() => {
+                            setSelectItemForBid(i);
+                            }}
+                            >Raise Bid</button>
                             <button className="h-10 w-40 bg-tag-lp rounded-3xl text-tag-l2 font-semibold hover:bg-tag-l2 hover:text-tag-lp"
                             onClick = {() => addItemToCart(userId,i.ItemId,quantity)}>Add to cart</button>
                         </div>
@@ -779,7 +781,9 @@ function Nav() {
                             className="md:w-40 w-[220px] h-12 border rounded-3xl bg-[#EBDDD3] text-[#3A1C32] font-bold dark:bg-[#3A1C32] dark:text-[#EBDDD3]">Contact Sellor</motion.button>
                             <motion.button 
                             whileHover={{ scale: 1.05 }}
+                            disabled={!selectItemForBid}
                             onClick={() => {
+                                if(!selectItemForBid) return;
                             const totalBid = selectItemForBid.CurrentBid + userBid;
                             axios.post("https://localhost:7269/api/Item/RaiseBid", {
                                 itemId: selectItemForBid.ItemId,
