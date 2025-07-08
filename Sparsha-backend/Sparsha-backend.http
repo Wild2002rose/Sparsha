@@ -1,0 +1,6 @@
+@Sparsha_backend_HostAddress = http://localhost:5186
+
+GET {{Sparsha_backend_HostAddress}}/weatherforecast/
+Accept: application/json
+
+###
