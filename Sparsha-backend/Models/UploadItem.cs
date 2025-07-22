@@ -17,5 +17,7 @@ namespace Sparsha_backend.Models
         [NotMapped]
         public string? ImagePath { get; set; }
         public bool IsFixedPrice { get; set; }
+        public int? BiddingDays { get; set; } 
+
     }
 }

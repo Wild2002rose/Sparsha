@@ -20,5 +20,10 @@ namespace Sparsha_backend.Models
         public int CurrentBid { get; set; }
         public bool IsFixedPrice { get; set; }
         public string ImagePath { get; set; }
+        public DateTime? BiddingEndTime { get; set; }
+        public bool IsBiddingLocked { get; set; }
+        public bool IsSold { get; set; }
+        public string? BuyerId { get; set; }
+        public int? FinalPrice { get; set; }
     }
 }

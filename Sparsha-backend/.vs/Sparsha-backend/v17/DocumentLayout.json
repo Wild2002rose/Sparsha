@@ -3,42 +3,32 @@
   "WorkspaceRootPath": "C:\\Users\\Nasrin Parvin\\Desktop\\Sparsha\\Sparsha-backend\\",
   "Documents": [
     {
-      "AbsoluteMoniker": "D:0:0:{6EA291E5-BBC9-44FA-81F7-537503320982}|Sparsha-backend.csproj|c:\\users\\nasrin parvin\\desktop\\sparsha\\sparsha-backend\\controllers\\itemcontroller.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
-      "RelativeMoniker": "D:0:0:{6EA291E5-BBC9-44FA-81F7-537503320982}|Sparsha-backend.csproj|solutionrelative:controllers\\itemcontroller.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+      "AbsoluteMoniker": "D:0:0:{6EA291E5-BBC9-44FA-81F7-537503320982}|Sparsha-backend.csproj|c:\\users\\nasrin parvin\\desktop\\sparsha\\sparsha-backend\\services\\razorpayservice.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{6EA291E5-BBC9-44FA-81F7-537503320982}|Sparsha-backend.csproj|solutionrelative:services\\razorpayservice.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
     },
     {
-      "AbsoluteMoniker": "D:0:0:{6EA291E5-BBC9-44FA-81F7-537503320982}|Sparsha-backend.csproj|c:\\users\\nasrin parvin\\desktop\\sparsha\\sparsha-backend\\models\\uploaditem.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
-      "RelativeMoniker": "D:0:0:{6EA291E5-BBC9-44FA-81F7-537503320982}|Sparsha-backend.csproj|solutionrelative:models\\uploaditem.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
-    },
-    {
-      "AbsoluteMoniker": "D:0:0:{6EA291E5-BBC9-44FA-81F7-537503320982}|Sparsha-backend.csproj|c:\\users\\nasrin parvin\\desktop\\sparsha\\sparsha-backend\\models\\itemofsellers.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
-      "RelativeMoniker": "D:0:0:{6EA291E5-BBC9-44FA-81F7-537503320982}|Sparsha-backend.csproj|solutionrelative:models\\itemofsellers.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
-    },
-    {
-      "AbsoluteMoniker": "D:0:0:{6EA291E5-BBC9-44FA-81F7-537503320982}|Sparsha-backend.csproj|c:\\users\\nasrin parvin\\desktop\\sparsha\\sparsha-backend\\models\\items.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
-      "RelativeMoniker": "D:0:0:{6EA291E5-BBC9-44FA-81F7-537503320982}|Sparsha-backend.csproj|solutionrelative:models\\items.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
-    },
-    {
-      "AbsoluteMoniker": "D:0:0:{6EA291E5-BBC9-44FA-81F7-537503320982}|Sparsha-backend.csproj|c:\\users\\nasrin parvin\\desktop\\sparsha\\sparsha-backend\\controllers\\authcontroller.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
-      "RelativeMoniker": "D:0:0:{6EA291E5-BBC9-44FA-81F7-537503320982}|Sparsha-backend.csproj|solutionrelative:controllers\\authcontroller.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
-    },
-    {
-      "AbsoluteMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|C:\\Users\\Nasrin Parvin\\AppData\\Local\\Temp\\rnaqfdbv..sql||{CC5D8DF0-88F4-4BB2-9DBB-B48CEE65C30A}|"
-    },
-    {
-      "AbsoluteMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|C:\\Users\\Nasrin Parvin\\AppData\\Local\\Temp\\2qi2clxz..sql||{CC5D8DF0-88F4-4BB2-9DBB-B48CEE65C30A}|"
-    },
-    {
-      "AbsoluteMoniker": "D:0:0:{6EA291E5-BBC9-44FA-81F7-537503320982}|Sparsha-backend.csproj|c:\\users\\nasrin parvin\\desktop\\sparsha\\sparsha-backend\\appsettings.json||{90A6B3A7-C1A3-4009-A288-E2FF89E96FA0}",
-      "RelativeMoniker": "D:0:0:{6EA291E5-BBC9-44FA-81F7-537503320982}|Sparsha-backend.csproj|solutionrelative:appsettings.json||{90A6B3A7-C1A3-4009-A288-E2FF89E96FA0}"
+      "AbsoluteMoniker": "D:0:0:{6EA291E5-BBC9-44FA-81F7-537503320982}|Sparsha-backend.csproj|c:\\users\\nasrin parvin\\desktop\\sparsha\\sparsha-backend\\services\\biddinglockservice.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{6EA291E5-BBC9-44FA-81F7-537503320982}|Sparsha-backend.csproj|solutionrelative:services\\biddinglockservice.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
     },
     {
       "AbsoluteMoniker": "D:0:0:{6EA291E5-BBC9-44FA-81F7-537503320982}|Sparsha-backend.csproj|c:\\users\\nasrin parvin\\desktop\\sparsha\\sparsha-backend\\program.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
       "RelativeMoniker": "D:0:0:{6EA291E5-BBC9-44FA-81F7-537503320982}|Sparsha-backend.csproj|solutionrelative:program.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
     },
     {
-      "AbsoluteMoniker": "D:0:0:{6EA291E5-BBC9-44FA-81F7-537503320982}|Sparsha-backend.csproj|c:\\users\\nasrin parvin\\desktop\\sparsha\\sparsha-backend\\models\\customuseridprovider.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
-      "RelativeMoniker": "D:0:0:{6EA291E5-BBC9-44FA-81F7-537503320982}|Sparsha-backend.csproj|solutionrelative:models\\customuseridprovider.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+      "AbsoluteMoniker": "D:0:0:{6EA291E5-BBC9-44FA-81F7-537503320982}|Sparsha-backend.csproj|c:\\users\\nasrin parvin\\desktop\\sparsha\\sparsha-backend\\appsettings.json||{90A6B3A7-C1A3-4009-A288-E2FF89E96FA0}",
+      "RelativeMoniker": "D:0:0:{6EA291E5-BBC9-44FA-81F7-537503320982}|Sparsha-backend.csproj|solutionrelative:appsettings.json||{90A6B3A7-C1A3-4009-A288-E2FF89E96FA0}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{6EA291E5-BBC9-44FA-81F7-537503320982}|Sparsha-backend.csproj|c:\\users\\nasrin parvin\\desktop\\sparsha\\sparsha-backend\\controllers\\itemcontroller.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{6EA291E5-BBC9-44FA-81F7-537503320982}|Sparsha-backend.csproj|solutionrelative:controllers\\itemcontroller.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{6EA291E5-BBC9-44FA-81F7-537503320982}|Sparsha-backend.csproj|c:\\users\\nasrin parvin\\desktop\\sparsha\\sparsha-backend\\models\\razorpayorderdto.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{6EA291E5-BBC9-44FA-81F7-537503320982}|Sparsha-backend.csproj|solutionrelative:models\\razorpayorderdto.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{6EA291E5-BBC9-44FA-81F7-537503320982}|Sparsha-backend.csproj|c:\\users\\nasrin parvin\\desktop\\sparsha\\sparsha-backend\\services\\mailservice.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{6EA291E5-BBC9-44FA-81F7-537503320982}|Sparsha-backend.csproj|solutionrelative:services\\mailservice.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
     }
   ],
   "DocumentGroupContainers": [
@@ -48,126 +38,92 @@
       "DocumentGroups": [
         {
           "DockedWidth": 200,
-          "SelectedChildIndex": 5,
+          "SelectedChildIndex": 0,
           "Children": [
             {
               "$type": "Document",
-              "DocumentIndex": 1,
-              "Title": "UploadItem.cs",
-              "DocumentMoniker": "C:\\Users\\Nasrin Parvin\\Desktop\\Sparsha\\Sparsha-backend\\Models\\UploadItem.cs",
-              "RelativeDocumentMoniker": "Models\\UploadItem.cs",
-              "ToolTip": "C:\\Users\\Nasrin Parvin\\Desktop\\Sparsha\\Sparsha-backend\\Models\\UploadItem.cs",
-              "RelativeToolTip": "Models\\UploadItem.cs",
-              "ViewState": "AgIAAAsAAAAAAAAAAAAgwBMAAAAFAAAAAAAAAA==",
+              "DocumentIndex": 0,
+              "Title": "RazorPayService.cs",
+              "DocumentMoniker": "C:\\Users\\Nasrin Parvin\\Desktop\\Sparsha\\Sparsha-backend\\Services\\RazorPayService.cs",
+              "RelativeDocumentMoniker": "Services\\RazorPayService.cs",
+              "ToolTip": "C:\\Users\\Nasrin Parvin\\Desktop\\Sparsha\\Sparsha-backend\\Services\\RazorPayService.cs",
+              "RelativeToolTip": "Services\\RazorPayService.cs",
+              "ViewState": "AgIAABwAAAAAAAAAAAAuwCAAAAAmAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2025-07-04T04:41:29.877Z"
-            },
-            {
-              "$type": "Document",
-              "DocumentIndex": 5,
-              "Title": "rnaqfdbv..sql",
-              "DocumentMoniker": "C:\\Users\\Nasrin Parvin\\AppData\\Local\\Temp\\rnaqfdbv..sql",
-              "RelativeDocumentMoniker": "..\\..\\..\\AppData\\Local\\Temp\\rnaqfdbv..sql",
-              "ToolTip": "C:\\Users\\Nasrin Parvin\\AppData\\Local\\Temp\\rnaqfdbv..sql",
-              "RelativeToolTip": "..\\..\\..\\AppData\\Local\\Temp\\rnaqfdbv..sql",
-              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000826|",
-              "WhenOpened": "2025-07-01T07:05:04.502Z"
-            },
-            {
-              "$type": "Document",
-              "DocumentIndex": 2,
-              "Title": "ItemOfSellers.cs",
-              "DocumentMoniker": "C:\\Users\\Nasrin Parvin\\Desktop\\Sparsha\\Sparsha-backend\\Models\\ItemOfSellers.cs",
-              "RelativeDocumentMoniker": "Models\\ItemOfSellers.cs",
-              "ToolTip": "C:\\Users\\Nasrin Parvin\\Desktop\\Sparsha\\Sparsha-backend\\Models\\ItemOfSellers.cs",
-              "RelativeToolTip": "Models\\ItemOfSellers.cs",
-              "ViewState": "AgIAAAcAAAAAAAAAAAAAwBQAAAAuAAAAAAAAAA==",
-              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2025-06-28T06:48:40.617Z"
+              "WhenOpened": "2025-07-13T04:39:36.819Z",
+              "EditorCaption": ""
             },
             {
               "$type": "Document",
               "DocumentIndex": 4,
-              "Title": "AuthController.cs",
-              "DocumentMoniker": "C:\\Users\\Nasrin Parvin\\Desktop\\Sparsha\\Sparsha-backend\\Controllers\\AuthController.cs",
-              "RelativeDocumentMoniker": "Controllers\\AuthController.cs",
-              "ToolTip": "C:\\Users\\Nasrin Parvin\\Desktop\\Sparsha\\Sparsha-backend\\Controllers\\AuthController.cs",
-              "RelativeToolTip": "Controllers\\AuthController.cs",
-              "ViewState": "AgIAAL4AAAAAAAAAAAAcwCABAAA2AAAAAAAAAA==",
-              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2025-06-27T14:20:34.385Z"
-            },
-            {
-              "$type": "Document",
-              "DocumentIndex": 3,
-              "Title": "Items.cs",
-              "DocumentMoniker": "C:\\Users\\Nasrin Parvin\\Desktop\\Sparsha\\Sparsha-backend\\Models\\Items.cs",
-              "RelativeDocumentMoniker": "Models\\Items.cs",
-              "ToolTip": "C:\\Users\\Nasrin Parvin\\Desktop\\Sparsha\\Sparsha-backend\\Models\\Items.cs",
-              "RelativeToolTip": "Models\\Items.cs",
-              "ViewState": "AgIAAAUAAAAAAAAAAAAxwAwAAAAmAAAAAAAAAA==",
-              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2025-06-28T06:48:56.75Z"
-            },
-            {
-              "$type": "Document",
-              "DocumentIndex": 0,
               "Title": "ItemController.cs",
               "DocumentMoniker": "C:\\Users\\Nasrin Parvin\\Desktop\\Sparsha\\Sparsha-backend\\Controllers\\ItemController.cs",
               "RelativeDocumentMoniker": "Controllers\\ItemController.cs",
               "ToolTip": "C:\\Users\\Nasrin Parvin\\Desktop\\Sparsha\\Sparsha-backend\\Controllers\\ItemController.cs",
               "RelativeToolTip": "Controllers\\ItemController.cs",
-              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAgAAAAeAAAAAAAAAA==",
+              "ViewState": "AgIAAHQCAAAAAAAAAAAswJ0AAABMAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2025-06-26T18:30:25.404Z",
-              "EditorCaption": ""
+              "WhenOpened": "2025-06-26T18:30:25.404Z"
             },
             {
               "$type": "Document",
-              "DocumentIndex": 8,
-              "Title": "Program.cs",
-              "DocumentMoniker": "C:\\Users\\Nasrin Parvin\\Desktop\\Sparsha\\Sparsha-backend\\Program.cs",
-              "RelativeDocumentMoniker": "Program.cs",
-              "ToolTip": "C:\\Users\\Nasrin Parvin\\Desktop\\Sparsha\\Sparsha-backend\\Program.cs",
-              "RelativeToolTip": "Program.cs",
-              "ViewState": "AgIAAC8AAAAAAAAAAAAkwDwAAAAwAAAAAAAAAA==",
-              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2025-06-26T18:45:00.534Z"
-            },
-            {
-              "$type": "Document",
-              "DocumentIndex": 9,
-              "Title": "CustomUserIdProvider.cs",
-              "DocumentMoniker": "C:\\Users\\Nasrin Parvin\\Desktop\\Sparsha\\Sparsha-backend\\Models\\CustomUserIdProvider.cs",
-              "RelativeDocumentMoniker": "Models\\CustomUserIdProvider.cs",
-              "ToolTip": "C:\\Users\\Nasrin Parvin\\Desktop\\Sparsha\\Sparsha-backend\\Models\\CustomUserIdProvider.cs",
-              "RelativeToolTip": "Models\\CustomUserIdProvider.cs",
-              "ViewState": "AgIAAAAAAAAAAAAAAAAAABAAAAAAAAAAAAAAAA==",
-              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2025-06-27T14:48:24.208Z"
-            },
-            {
-              "$type": "Document",
-              "DocumentIndex": 6,
-              "Title": "2qi2clxz..sql",
-              "DocumentMoniker": "C:\\Users\\Nasrin Parvin\\AppData\\Local\\Temp\\2qi2clxz..sql",
-              "RelativeDocumentMoniker": "..\\..\\..\\AppData\\Local\\Temp\\2qi2clxz..sql",
-              "ToolTip": "C:\\Users\\Nasrin Parvin\\AppData\\Local\\Temp\\2qi2clxz..sql",
-              "RelativeToolTip": "..\\..\\..\\AppData\\Local\\Temp\\2qi2clxz..sql",
-              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000826|",
-              "WhenOpened": "2025-06-28T06:20:45.746Z"
-            },
-            {
-              "$type": "Document",
-              "DocumentIndex": 7,
+              "DocumentIndex": 3,
               "Title": "appsettings.json",
               "DocumentMoniker": "C:\\Users\\Nasrin Parvin\\Desktop\\Sparsha\\Sparsha-backend\\appsettings.json",
               "RelativeDocumentMoniker": "appsettings.json",
               "ToolTip": "C:\\Users\\Nasrin Parvin\\Desktop\\Sparsha\\Sparsha-backend\\appsettings.json",
               "RelativeToolTip": "appsettings.json",
-              "ViewState": "AgIAAAAAAAAAAAAAAAAAABEAAAAAAAAAAAAAAA==",
+              "ViewState": "AgIAAAMAAAAAAAAAAAAAABIAAAADAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.001642|",
-              "WhenOpened": "2025-06-27T17:47:32.422Z"
+              "WhenOpened": "2025-07-13T04:35:29.738Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 1,
+              "Title": "BiddingLockService.cs",
+              "DocumentMoniker": "C:\\Users\\Nasrin Parvin\\Desktop\\Sparsha\\Sparsha-backend\\Services\\BiddingLockService.cs",
+              "RelativeDocumentMoniker": "Services\\BiddingLockService.cs",
+              "ToolTip": "C:\\Users\\Nasrin Parvin\\Desktop\\Sparsha\\Sparsha-backend\\Services\\BiddingLockService.cs",
+              "RelativeToolTip": "Services\\BiddingLockService.cs",
+              "ViewState": "AgIAAG0AAAAAAAAAAAAUwIUAAAAJAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2025-07-11T07:24:43.232Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 2,
+              "Title": "Program.cs",
+              "DocumentMoniker": "C:\\Users\\Nasrin Parvin\\Desktop\\Sparsha\\Sparsha-backend\\Program.cs",
+              "RelativeDocumentMoniker": "Program.cs",
+              "ToolTip": "C:\\Users\\Nasrin Parvin\\Desktop\\Sparsha\\Sparsha-backend\\Program.cs",
+              "RelativeToolTip": "Program.cs",
+              "ViewState": "AgIAAGkAAAAAAAAAAAAAACkAAAAPAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2025-07-12T06:49:24.149Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 5,
+              "Title": "RazorpayOrderDto.cs",
+              "DocumentMoniker": "C:\\Users\\Nasrin Parvin\\Desktop\\Sparsha\\Sparsha-backend\\Models\\RazorpayOrderDto.cs",
+              "RelativeDocumentMoniker": "Models\\RazorpayOrderDto.cs",
+              "ToolTip": "C:\\Users\\Nasrin Parvin\\Desktop\\Sparsha\\Sparsha-backend\\Models\\RazorpayOrderDto.cs",
+              "RelativeToolTip": "Models\\RazorpayOrderDto.cs",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAYAAAArAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2025-07-13T04:57:41.686Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 6,
+              "Title": "MailService.cs",
+              "DocumentMoniker": "C:\\Users\\Nasrin Parvin\\Desktop\\Sparsha\\Sparsha-backend\\Services\\MailService.cs",
+              "RelativeDocumentMoniker": "Services\\MailService.cs",
+              "ToolTip": "C:\\Users\\Nasrin Parvin\\Desktop\\Sparsha\\Sparsha-backend\\Services\\MailService.cs",
+              "RelativeToolTip": "Services\\MailService.cs",
+              "ViewState": "AgIAAJ0AAAAAAAAAAAAmwL8AAAAAAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2025-07-13T05:27:10.388Z"
             }
           ]
         }

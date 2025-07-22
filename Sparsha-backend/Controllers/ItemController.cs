@@ -1,15 +1,16 @@
-﻿using FirebaseAdmin.Messaging;
+﻿using System.Security.Claims;
+using System.Text.Json;
+using FirebaseAdmin.Messaging;
+using FirebaseAdmin.Messaging;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.SignalR;
 using Microsoft.EntityFrameworkCore;
 using Sparsha_backend.Data;
 using Sparsha_backend.Models;
-using FirebaseAdmin.Messaging;
-using Notification = Sparsha_backend.Models.Notification;
 using Sparsha_backend.Services;
-using Microsoft.AspNetCore.Authorization;
-using System.Security.Claims;
+using Notification = Sparsha_backend.Models.Notification;
 
 namespace Sparsha_backend.Controllers
 {
@@ -21,12 +22,20 @@ namespace Sparsha_backend.Controllers
         private readonly MailService _mailService;
         private readonly INotificationService _notificationService;
         private readonly IHubContext<NotificationHub> _hubContext;
-        public ItemController(ItemDbContext itemDbContext, MailService mailService, INotificationService notificationService, IHubContext<NotificationHub> hubContext)
+        private readonly RazorPayService _razorPayService;
+        public ItemController(
+            ItemDbContext itemDbContext, 
+            MailService mailService, 
+            INotificationService notificationService, 
+            IHubContext<NotificationHub> hubContext,
+            RazorPayService razorPayService
+            )
         {
             _itemDbContext = itemDbContext;
             _mailService = mailService;
             _notificationService = notificationService;
             _hubContext = hubContext;
+            _razorPayService = razorPayService;
         }
 
         
@@ -64,7 +73,12 @@ namespace Sparsha_backend.Controllers
                 i.ImagePath,
                 i.CurrentBid,
                 i.Price,
-                i.Description
+                i.Description,
+                i.IsFixedPrice,
+                BiddingEndTime = _itemDbContext.ItemOfSellers
+                .Where(s => s.ItemId == i.ItemId)
+                .Select(s => s.BiddingEndTime)
+                .FirstOrDefault()
             }).ToListAsync();
             return Ok(items);
         }
@@ -97,7 +111,7 @@ namespace Sparsha_backend.Controllers
                 Category = item.CategoryName,
                 Description = item.Description,
                 Price = item.MyPrice,
-                CurrentBid = item.CurrentBid,
+                CurrentBid = item.IsFixedPrice ? null : item.MyPrice,
                 ImagePath = dbPath,
                 IsFixedPrice = item.IsFixedPrice
             };
@@ -114,7 +128,14 @@ namespace Sparsha_backend.Controllers
                 MyPrice = item.MyPrice,
                 ImagePath = dbPath,
                 ItemId = publicItem.ItemId,
-                IsFixedPrice = item.IsFixedPrice
+                IsFixedPrice = item.IsFixedPrice,
+                IsBiddingLocked = false,
+                IsSold = false,
+                BiddingEndTime = item.BiddingDays.HasValue
+                ? DateTime.UtcNow.AddDays(item.BiddingDays.Value)
+                : DateTime.UtcNow.AddDays(15),
+                BuyerId = null,
+                FinalPrice = null
             };
 
             _itemDbContext.ItemOfSellers.Add(newItem);
@@ -138,6 +159,21 @@ namespace Sparsha_backend.Controllers
         {
             var items = await _itemDbContext.GlobalItems
                 .Where(x => x.Category == category)
+                .Select(x => new
+                {
+                    x.ItemId,
+                    x.Name,
+                    x.Description,
+                    x.ImagePath,
+                    x.IsFixedPrice,
+                    x.CurrentBid,
+                    x.Price,
+                    // Join with ItemOfSellers to get BiddingEndTime
+                    BiddingEndTime = _itemDbContext.ItemOfSellers
+                                .Where(s => s.ItemId == x.ItemId)
+                                .Select(s => s.BiddingEndTime)
+                                .FirstOrDefault()
+                })
                 .ToListAsync();
 
             return Ok(items);
@@ -150,9 +186,34 @@ namespace Sparsha_backend.Controllers
             {
                 return BadRequest("Invalid item ID format.");
             }
-            var items = await _itemDbContext.GlobalItems
-                .Where(x => x.ItemId == parsedItemId).ToListAsync();
-            return Ok(items);
+
+            var item = await _itemDbContext.GlobalItems
+                .Where(x => x.ItemId == parsedItemId)
+                .Select(x => new
+                {
+                    x.ItemId,
+                    x.Name,
+                    x.Category,
+                    x.Description,
+                    x.Price,
+                    x.CurrentBid,
+                    x.IsFixedPrice,
+                    x.ImagePath,
+                    SellerId = _itemDbContext.ItemOfSellers
+                        .Where(s => s.ItemId == x.ItemId)
+                        .Select(s => s.SellerId)
+                        .FirstOrDefault(),
+                    BiddingEndTime = _itemDbContext.ItemOfSellers
+                        .Where(s => s.ItemId == x.ItemId)
+                        .Select(s => s.BiddingEndTime)
+                        .FirstOrDefault()
+                })
+                .FirstOrDefaultAsync();
+
+            if (item == null)
+                return NotFound("Item not found.");
+
+            return Ok(item);
         }
 
         [HttpPost("wishlist/add")]
@@ -160,6 +221,17 @@ namespace Sparsha_backend.Controllers
         {
             try
             {
+                var item = await _itemDbContext.ItemOfSellers
+                    .Include(x => x.Item)
+                    .FirstOrDefaultAsync(x => x.ItemId == dto.ItemId);
+                if(item == null)
+                {
+                    return NotFound("Item not found.");
+                }
+                if(item.SellerId == dto.UserId)
+                {
+                    return BadRequest("You can't add your own item to wishlist");
+                }
                 var exists = await _itemDbContext.WishlistItems
                     .AnyAsync(w => w.UserId == dto.UserId && w.ItemId == dto.ItemId);
 
@@ -216,6 +288,17 @@ namespace Sparsha_backend.Controllers
             if(dto.Quantity <= 0)
             {
                 return BadRequest("Quantity must be at least 1");
+            }
+            var item = await _itemDbContext.ItemOfSellers
+                .Include(x => x.Item)
+                .FirstOrDefaultAsync(x => x.ItemId == dto.ItemId);
+            if(item == null)
+            {
+                return NotFound("Item not found");
+            }
+            if(item.SellerId == userId)
+            {
+                return BadRequest("You can't add your own item to cart");
             }
             var cart = await _itemDbContext.Carts
                 .Include(c => c.Items)
@@ -299,53 +382,17 @@ namespace Sparsha_backend.Controllers
             return Ok("Items removed from wishlist");
         }
 
-        [HttpPost("Place-Order")]
-        public async Task<IActionResult> PlaceOrder([FromBody] PlaceOrderDto dto)
-        {
-            var cart = await _itemDbContext.Carts
-                .Include(c => c.Items)
-                .ThenInclude(ci => ci.Item)
-                .FirstOrDefaultAsync( c => c.UserId == dto.UserId);
-            if (cart == null || !cart.Items.Any())
-            {
-                return BadRequest("Your cart is empty.");
-            }
-            var order = new Order
-            {
-                UserId = dto.UserId,
-                OrderDate = DateTime.UtcNow,
-                PaymentMethod = dto.PaymentMethod,
-                Address = dto.Address,
-                TotalPrice = dto.TotalPrice,
-                OrderItems = new List<OrderItem>()
-            };
-            foreach (var cartItem in cart.Items)
-            {
-                var orderItem = new OrderItem
-                {
-                    ItemId = cartItem.ItemId,
-                    Quantity = cartItem.Quantity,
-                    Price = cartItem.Item.Price
-                };
-                order.OrderItems.Add(orderItem);
-            }
-            _itemDbContext.Orders.Add(order);
-            _itemDbContext.CartItems.RemoveRange(cart.Items);
-            await _itemDbContext.SaveChangesAsync();
-            return Ok(new { message = "Order placed successfully" });
-        }
-
         [HttpPost("Send-code")]
         public async Task<IActionResult> SendCode([FromBody] CodeRequest request)
         {
-            var seller = await _itemDbContext.Sellers.FirstOrDefaultAsync(s => s.SellerId == request.UserId);
-            if(seller == null || string.IsNullOrEmpty(seller.Email))
+            var buyer = await _itemDbContext.Members.FirstOrDefaultAsync(s => s.UserId == request.UserId);
+            if(buyer == null || string.IsNullOrEmpty(buyer.Email))
             {
                 return BadRequest("Seller not found or email is missing");
             }
             var code = _mailService.GenerateVerificationCode();
 
-            bool result = await _mailService.SendCode(seller.Email, seller.Name, code);
+            bool result = await _mailService.SendCode(buyer.Email, buyer.Name, code);
             if (!result)
             {
                 return StatusCode(500, "Failed to send verification email.");
@@ -397,7 +444,6 @@ namespace Sparsha_backend.Controllers
             return Ok(result);
         }
 
-
         [HttpPost("RaiseBid")]
         public async Task<IActionResult> RaiseBid([FromBody] RaiseDto dto)
         {
@@ -406,42 +452,112 @@ namespace Sparsha_backend.Controllers
                 var globalItem = await _itemDbContext.GlobalItems.FindAsync(dto.ItemId);
                 if (globalItem == null)
                     return NotFound("Item not found");
+
                 if (globalItem.IsFixedPrice)
                     return BadRequest("Bidding is not allowed on fixed-price items.");
 
                 if (dto.NewBid <= 0)
                     return BadRequest("Bid must be greater than 0");
 
-                globalItem.CurrentBid = (globalItem.CurrentBid ?? 0) + dto.NewBid;
                 var sellerItem = await _itemDbContext.ItemOfSellers
                     .FirstOrDefaultAsync(x => x.ItemId == dto.ItemId);
                 if (sellerItem == null)
-                {
-                    Console.WriteLine("Seller item not found");
-                }
-                else
-                {
-                    if (sellerItem.SellerId == dto.UserId)
-                        return BadRequest("You can't bid on your own item");
-                    sellerItem.CurrentBid += dto.NewBid;
+                    return NotFound("Seller item not found");
 
+                if (sellerItem.SellerId == dto.UserId)
+                    return BadRequest("You can't bid on your own item");
+
+                if (dto.NewBid <= sellerItem.MyPrice)
+                    return BadRequest($"Your bid must be greater than the seller's base price of ₹{sellerItem.MyPrice}.");
+
+                if (dto.NewBid <= sellerItem.CurrentBid)
+                    return BadRequest($"Your bid must be higher than the current bid of ₹{sellerItem.CurrentBid}.");
+
+                if (sellerItem.BiddingEndTime.HasValue && DateTime.UtcNow > sellerItem.BiddingEndTime.Value)
+                {
+                    sellerItem.IsBiddingLocked = true;
+
+                    var topBid = await _itemDbContext.Bids
+                        .Where(b => b.ItemId == dto.ItemId)
+                        .OrderByDescending(b => b.Amount)
+                        .FirstOrDefaultAsync();
+
+                    if (topBid != null)
+                    {
+                        sellerItem.IsSold = true;
+                        sellerItem.BuyerId = topBid.UserId;
+                        sellerItem.FinalPrice = topBid.Amount;
+                        globalItem.CurrentBid = topBid.Amount;
+                    }
+
+                    await _itemDbContext.SaveChangesAsync();
+                    return BadRequest("Bidding time has ended. The item has been locked.");
+                }
+
+                if (sellerItem.IsBiddingLocked)
+                {
+                    return BadRequest("Bidding on this item has been locked by the owner.");
+                }
+
+                var newBid = new Bid
+                {
+                    ItemId = dto.ItemId,
+                    UserId = dto.UserId,
+                    Amount = dto.NewBid,
+                    BidTime = DateTime.UtcNow
+                };
+                _itemDbContext.Bids.Add(newBid);
+
+                globalItem.CurrentBid = dto.NewBid;
+                sellerItem.CurrentBid = dto.NewBid;
+
+                var bidder = await _itemDbContext.Members
+                    .FirstOrDefaultAsync(u => u.UserId == dto.UserId);
+                string bidderName = bidder?.Name ?? "Someone";
+
+                await _notificationService.SendAsync(new SendNotificationDto
+                {
+                    OwnerId = sellerItem.SellerId,
+                    Title = "New Bid Alert! 🎯",
+                    Body = $"New bid of ₹{dto.NewBid} from {bidderName} on your item '{globalItem.Name}'.",
+                    Type = "bid",
+                    Data = new Dictionary<string, string>
+            {
+                { "itemId", dto.ItemId.ToString() },
+                { "newBid", dto.NewBid.ToString() },
+                { "biddername", bidderName }
+            }
+                });
+
+                await _hubContext.Clients.User(sellerItem.SellerId)
+                    .SendAsync("ReceiveNotification", $"💰 New bid of ₹{dto.NewBid} from {bidderName} on '{globalItem.Name}'");
+
+                var outbidUsers = await _itemDbContext.Bids
+                    .Where(b => b.ItemId == dto.ItemId && b.UserId != dto.UserId)
+                    .Select(b => b.UserId)
+                    .Distinct()
+                    .ToListAsync();
+
+                foreach (var userId in outbidUsers)
+                {
                     await _notificationService.SendAsync(new SendNotificationDto
                     {
-                        OwnerId = sellerItem.SellerId,
-                        Title = "New Bid Alert! 🎯",
-                        Body = $"New bid of ₹{dto.NewBid} on your item '{globalItem.Name}'.",
-                        Type = "bid",
+                        OwnerId = userId,
+                        Title = "You've been outbid 😕",
+                        Body = $"Your bid on '{globalItem.Name}' was outbid. Current bid: ₹{dto.NewBid}.",
+                        Type = "outbid",
                         Data = new Dictionary<string, string>
-                        {
-                            { "itemId", dto.ItemId.ToString() },
-                            { "newBid", dto.NewBid.ToString() }
-                        }
-                    });
-                    await _hubContext.Clients.User(sellerItem.SellerId)
-                    .SendAsync("ReceiveNotification", $"💰 New bid of ₹{dto.NewBid} on your item '{globalItem.Name}'");
+                {
+                    { "itemId", dto.ItemId.ToString() },
+                    { "newBid", dto.NewBid.ToString() }
                 }
+                    });
+
+                    await _hubContext.Clients.User(userId)
+                        .SendAsync("ReceiveNotification", $"⚠️ You've been outbid on '{globalItem.Name}'. New bid: ₹{dto.NewBid}");
+                }
+
                 await _itemDbContext.SaveChangesAsync();
-                Console.WriteLine("Adding notification...");
                 return Ok(new { message = "Bid placed", newBid = dto.NewBid });
             }
             catch (Exception ex)
@@ -450,6 +566,7 @@ namespace Sparsha_backend.Controllers
                 return StatusCode(500, "Internal server error");
             }
         }
+
 
         [HttpGet("FixedPriceItems")]
         public async Task<IActionResult> GetFixedPriceItems()
@@ -461,7 +578,73 @@ namespace Sparsha_backend.Controllers
             return Ok(items);
         }
 
+        [HttpPost("Place-Order")]
+        public async Task<IActionResult> PlaceOrder([FromBody] PlaceOrderDto dto)
+        {
+            var cart = await _itemDbContext.Carts
+                .Include(c => c.Items)
+                .ThenInclude(ci => ci.Item)
+                .FirstOrDefaultAsync(c => c.UserId == dto.UserId);
+            if (cart == null || !cart.Items.Any())
+            {
+                return BadRequest("Your cart is empty.");
+            }
+            var order = new Order
+            {
+                UserId = dto.UserId,
+                OrderDate = DateTime.UtcNow,
+                PaymentMethod = dto.PaymentMethod,
+                Address = dto.Address,
+                TotalPrice = dto.TotalPrice,
+                OrderItems = new List<OrderItem>()
+            };
+            foreach (var cartItem in cart.Items)
+            {
+                var orderItem = new OrderItem
+                {
+                    ItemId = cartItem.ItemId,
+                    Quantity = cartItem.Quantity,
+                    Price = cartItem.Item.Price
+                };
+                order.OrderItems.Add(orderItem);
+            }
+            _itemDbContext.Orders.Add(order);
+            _itemDbContext.CartItems.RemoveRange(cart.Items);
+            await _itemDbContext.SaveChangesAsync();
 
+            //send invoice 
+            var user = await _itemDbContext.Members.FindAsync(dto.UserId);
+            if (user != null)
+            {
+                var pdfBytes = _mailService.GenerateInvoicePdf(order);
+                string paymentLink = null;
+                if (dto.PaymentMethod == "UPI" && user != null)
+                {
+                    paymentLink = await _razorPayService.CreatePaymentLinkAsync(order);
+                }
+                var emailSent = await _mailService.SendInvoiceEmailAsync(
+                    toEmail: user.Email,
+                    name: user.Name,
+                    pdfBytes: pdfBytes,
+                    paymentLink: paymentLink
+                    );
+                if (emailSent)
+                {
+                    await _notificationService.SendAsync(new SendNotificationDto
+                    {
+                        OwnerId = user.UserId,
+                        Title = "Invoice Sent",
+                        Body = $"Your invoice for the order placed has been sent to {user.Email}",
+                        Type = "order_invoice"
+
+                    });
+                }
+            }
+            return Ok(new
+            {
+                message = "Order placed successfully"
+            });
+        }
 
 
 

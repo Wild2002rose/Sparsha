@@ -1,5 +1,8 @@
 import React, { useEffect, useState, useRef } from "react";
-import { FaBell, FaBellSlash, FaTimes, FaHeart } from "react-icons/fa";
+import { useDispatch, useSelector } from "react-redux";
+import { addToCart } from "../redux/slices/cartSlice";
+import { addToWishlist, removeFromWishlist } from "../redux/slices/wishlistSlice";
+import { FaBell, FaTimes, FaHeart } from "react-icons/fa";
 import {Toaster, toast} from 'react-hot-toast';
 import Nav from "./Nav";
 import clock1 from "../Assets/c5.webp";
@@ -10,12 +13,10 @@ import light1 from "../Assets/l1.avif";
 import m1 from "../Assets/m1.jpg";
 import mc1 from "../Assets/mc1.jpg";
 import p1 from "../Assets/p1.avif";
-import { motion, AnimatePresence, delay } from "framer-motion";
+import { motion, AnimatePresence, } from "framer-motion";
 import axios from "axios";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "./AuthContext";
-import { requestNotificationPermission } from "../firebase-messaging"; // path must match your filename
-import * as signalR from '@microsoft/signalr';
 
 import f2 from "../Assets/f2.jpg";
 import j2 from "../Assets/j2.jpg";
@@ -32,6 +33,7 @@ import fabric from "../Assets/fabric.jpg";
 import { div, h1, p } from "framer-motion/client";
 import Item from "./Item";
 import End from "./End";
+import CountDownTimer from "./CountDownTimer";
 
 function Home() {
   const itemVariants = {
@@ -63,9 +65,7 @@ function Home() {
   const [isCodeSent,setIsCodeSent] = useState(false);
   const [code, setCode] = useState('');
   const [isCodeVerified, setIsCodeVerified] = useState(false);
-  const [successMsg, setSuccessMsg] = useState('');
   const [sellerId, setSellerId] = useState("");
-  const [inputPassword, setInputPassword] = useState("");
   const [showRegister, setShowRegister] = useState(false);
   const [showLogin, setShowLogin] = useState(false);
   const {login} = useAuth();
@@ -261,19 +261,6 @@ function Home() {
         fetchItems();
     },[selectedCategory]);
     useEffect(() => {
-        if(!selectedItem) return;
-        const fetchItem = async() => {
-            try {
-                const response = await axios.get(`https://localhost:7269/api/Item/GlobalItems/ById/${selectedItem}`);
-                setItem(response.data);
-                console.log(response.data);
-            } catch(error) {
-                console.error("Error fetching item", error);
-            }
-        };
-        fetchItem();
-    },[selectedItem]);
-    useEffect(() => {
         if(selectedItem && itemsRefs.current[selectedItem]){
             itemsRefs.current[selectedItem].scrollIntoView({
                 behavior: 'smooth',
@@ -283,6 +270,7 @@ function Home() {
     },[selectedItem]);
 
     //Wishlist & Cartlish
+    const dispatch = useDispatch();
     const handleWishlist = () => {
         navigate('/wishlist');
     };
@@ -290,7 +278,7 @@ function Home() {
         navigate('/cart');
     }
     const [wishlist, setWishlist] = useState([]);
-    const addToWishlist = async () => {
+    const handleAddToWishlist = async () => {
     try {
         const userId = localStorage.getItem("userId"); 
         if (!userId || !selectedItem) {
@@ -302,7 +290,6 @@ function Home() {
             userId: userId,
             itemId: selectedItem 
         });
-
         console.log("Item added to wishlist");
         toast.success("Your item is uploaded successfully, you can see the bids now.", {
             duration: 10000,
@@ -343,6 +330,7 @@ function Home() {
                     const updated = prevWishlist.filter(item => item.ItemId !== itemId);
                     return updated;
                 });
+                dispatch(removeFromWishlist(itemId));
                 toast.info("Item removed from wishlist!");
             } else {
                 const {data: newItem} = await axios.post("https://localhost:7269/api/Item/wishlist/add",
@@ -355,6 +343,7 @@ function Home() {
                     const updated = [...prevWishlist, added];
                     return updated;
                 });
+                dispatch(addToWishlist({userId,itemId}));
                 toast.success("Item added to wishlist!");
             }
         } catch (error) {
@@ -365,6 +354,7 @@ function Home() {
     const [cartItems, setCartItems] = useState([]);
     const quantity =1;
     const addItemToCart = async (userId,itemId, quantity) => {
+      dispatch(addToCart({userId,itemId,quantity}));
         try {
             const response = await axios.post(`https://localhost:7269/api/Item/addItemToCart/${userId}`,{
                 userId: userId,
@@ -375,15 +365,20 @@ function Home() {
             toast.success("Item is added to cart!");
         } catch (error) {
             console.error("Error adding to cart:", error.response?.data||error.message);
-            toast.info("Error to add!");
+            toast.error("Error to add!");
         }
     };
 
 
     const detailsRef = useRef(null);
-    const [userBid, setUserBid] = useState(0);
+    const [userBid, setUserBid] = useState();
     const [currentBid, setCurrentBid] = useState(null);
     const [selectItemForBid, setSelectItemForBid] = useState(null);
+useEffect(() => {
+  if (selectItemForBid) {
+    setUserBid(selectItemForBid.CurrentBid || 0);
+  }
+}, [selectItemForBid]);
 
     useEffect(() => {
         function handleClickOutside(event) {
@@ -429,9 +424,10 @@ const fetchNotifications = async (userId) => {
   }
 };
 useEffect(() => {
-  const userId = localStorage.getItem("userId");
-  if (userId) {
-    fetchNotifications(userId); 
+  const storedUserId = localStorage.getItem("userId");
+  if (storedUserId) {
+    setUserId(storedUserId);
+    fetchNotifications(storedUserId);
   } else {
     console.warn("⚠️ No valid userId in localStorage");
   }
@@ -448,18 +444,31 @@ useEffect(() => {
       <div className="bg-gradient-to-b from-tag-l2 to-tag-l3 md:px-16 px-10 py-40 md:flex grid md:gap-20 gap-10
       dark:bg-gradient-to-b dark:from-tag-black dark:to-tag-dark md:h-[540px] h-[800px] w-full">
         <div>
-          <img
+          <motion.img
             src={furniture1}
-            alt=""
+            alt="" initial={{ opacity: 0, scale: 0.9 }}
+  whileInView={{ opacity: 1, scale: 1 }}
+  transition={{ duration: 1 }}
+  viewport={{ once: true }}
             className="h-[340px] md:w-[800px] w-[400px] px-14 py-8 border-2 border-white dark:bg-white bg-tag-light"
           />
         </div>
         <div className="grid md:ml-0 ml-4">
           <h1 className="md:text-4xl text-2xl dark:text-tag-light text-tag-dark font-semibold mt-6">
             Welcome to
-            <span className="md:text-6xl text-4xl dark:text-tag-lp text-tag-lp ml-10 font-alex">
+            <motion.span 
+            style={{
+              textShadow: `
+                1px 1px 0 #bbb,
+                2px 2px 0 #aaa,
+                3px 3px 0 #999,
+                4px 4px 0 #888,
+                5px 5px 0 #777
+              `
+            }}
+            className="md:text-6xl text-4xl dark:text-tag-lp text-tag-lp ml-10 font-alex">
               Sparsha
-            </span>
+            </motion.span>
           </h1>
           <h1 className="md:text-2xl text-xl dark:text-white text-tag-dark md:ml-10 ml-4 font-semibold mt-10">
             <h1>“ Where elegance meets nostalgia.</h1>
@@ -470,8 +479,12 @@ useEffect(() => {
       </div>
 
       
-      <div className="md:h-[500px] h-[450px] md:px-16 px-10 py-10 dark:bg-gradient-to-t dark:from-tag-dark 
-      dark:to-tag-dark bg-gradient-to-t from-tag-l2 to-tag-l3">
+      <div className="md:h-[500px] h-[450px] md:px-16 px-10 py-10 
+        dark:bg-gradient-to-t dark:from-tag-dark dark:to-tag-dark 
+        bg-gradient-to-t from-tag-l2 to-tag-l3 
+        relative overflow-hidden before:absolute before:inset-0 before:bg-[radial-gradient(ellipse_at_center,_var(--tw-gradient-stops))] 
+        before:from-white/10 before:to-transparent before:opacity-30 before:z-0 rounded-xl transition-all duration-700">
+
         <div className="h-full bg-tag-light dark:bg-white rounded-lg shadow-inner px-6 
         md:py-10 py-5 flex justify-center gap-6 transition-all duration-700">
           {visibleItems.map(({ id, src }) => (
@@ -771,49 +784,83 @@ useEffect(() => {
                       <div className="md:flex md:gap-20 grid gap-0">
       
                           <div className="md:w-[75%] w-[90%]">
-                          {Array.isArray(item) && item.length > 0 ? (
-                              item.map((i,index) => (
-      
-                              <div key={i.ItemId} className="border dark:border-tag-b2 border-tag-l5 dark:bg-black bg-tag-l5 shadow-lg md:p-10 p-4
+                          {selectedItem ? (
+                              <div key={selectedItem.ItemId} className="border dark:border-tag-b2 border-tag-l5 dark:bg-black bg-tag-l5 shadow-lg md:p-10 p-4
                                rounded-xl  md:h-[450px] h-[450px] md:w-[1000px] w-[400px] md:mt-[30px] md:ml-[50px] ml-[10px] md:flex md:gap-10">
                               <div className="md:w-[580px] md:h-[480px] w-[360px] h-[180px] relative overflow-hidden ">
-                                  <img src={`https://localhost:7269${i.ImagePath}`} alt={i.Name} className=" object-cover w-full h-[78%]" />
+                                  <img src={`https://localhost:7269${selectedItem.ImagePath}`} alt={selectedItem.Name} className=" object-cover w-full h-[78%]" />
                               </div>
                               <div className="md:w-[450px] w-[360px]">
-                                  <h2 className="text-2xl font-bold md:py-2 text-center text-tag-lp">{i.Name}</h2>
+                                  <h2 className="text-2xl font-bold md:py-2 text-center text-tag-lp">{selectedItem.Name}</h2>
                                   <p className="text-sm text-tag-dark dark:text-tag-l2 md:mt-4 mt-2 md:h-[150px] h-[80px]">
-                                  {i.Description} 
+                                  {selectedItem.Description} 
+                                  </p>
+                                  <p className="">
+                                  { !selectedItem.IsFixedPrice && (
+                                      <CountDownTimer endTime={new Date(selectedItem.BiddingEndTime)} />
+                                  )}
                                   </p>
                               <div className="flex justify-between items-center">
+
                                   <div className="grid md:py-6 py-4">
-                                  <p className="text-tag-dark dark:text-tag-l2 font-bold">Current Bid: <span className="text-tag-lp"> ₹ {i.CurrentBid}</span></p>
+                                    {selectedItem.IsFixedPrice ? (
+                                      <p className="text-tag-dark dark:text-tag-l2 font-bold">
+                                        Price: <span className="text-tag-lp"> ₹ {selectedItem.Price}</span>
+                                      </p>
+                                    ) : (
+                                      <p className="text-tag-dark dark:text-tag-l2 font-bold">
+                                        Current Bid: <span className="text-tag-lp"> ₹ {selectedItem.CurrentBid}</span>
+                                      </p>
+                                    )}
                                   </div>
+
+
                                   <div>
                                   <FaHeart
                                   size={24}
                                   className={`cursor-pointer transition-all duration-300 ${
-                                      inWishlist(i.ItemId) ? "text-red-500" : "text-white"
+                                      inWishlist(selectedItem.ItemId) ? "text-red-500" : "text-white"
                                   }`}
                                   onClick={() =>{ 
-                                      toggleWishlist(i.ItemId); 
-                                      // addToWishlist(i.ItemId);
+                                      toggleWishlist(selectedItem.ItemId); 
                                   }}
                                   />
                                   </div>
                               </div>
+
                               <div className="flex justify-between items-center">
-                                  <button className="h-10 w-40 bg-tag-lp rounded-3xl text-tag-l2 font-semibold hover:bg-tag-l2 hover:text-tag-lp"
-                                  onClick = {() =>{
-                                    setSelectItemForBid(i);
-                                    setCurrentBid(i.currentBid);
-                                  }}>Raise Bid</button>
-                                  <button className="h-10 w-40 bg-tag-lp rounded-3xl text-tag-l2 font-semibold hover:bg-tag-l2 hover:text-tag-lp"
-                                  onClick = {() => addItemToCart(userId,i.ItemId,quantity)}>Add to cart</button>
+                                {selectedItem.IsFixedPrice ? (
+                                  <>
+                                    <button
+                                      className="h-10 w-40 bg-tag-l2 rounded-3xl text-tag-dark font-semibold hover:bg-tag-l hover:text-tag-l2"
+                                      onClick={() => toggleWishlist(selectedItem.ItemId)}
+                                    >
+                                      {inWishlist(selectedItem.ItemId) ? "Wishlisted" : "Add to Wishlist"}
+                                    </button>
+                                    <button
+                                      className="h-10 w-40 bg-tag-lp rounded-3xl text-tag-l2 font-semibold hover:bg-tag-l2 hover:text-tag-lp"
+                                      onClick={() => addItemToCart(userId, selectedItem.ItemId, quantity)}
+                                    >Add to Cart
+                                    </button>
+                                    </>
+                                    ) : (
+                                    <>
+                                      <button
+                                        className="h-10 w-40 bg-tag-lp rounded-3xl text-tag-l2 font-semibold hover:bg-tag-l2 hover:text-tag-lp"
+                                        onClick={() => {setSelectItemForBid(selectedItem);}}>Raise Bid
+                                      </button>
+                                      <button
+                                        className="h-10 w-40 bg-tag-l2 rounded-3xl text-tag-dark font-semibold hover:bg-tag-l hover:text-tag-l2"
+                                        onClick={() => toggleWishlist(selectedItem.ItemId)}>
+                                          {inWishlist(selectedItem.ItemId) ? "Wishlisted" : "Add to Wishlist"}
+                                      </button>
+                                    </>
+                                  )}
                               </div>
+
                               </div>
                               </div>
                               
-                                  ))
                               ) : (
                                   <p className="text-center font-semibold p-10">No items found</p>
                               )}
@@ -827,11 +874,11 @@ useEffect(() => {
                                       key={globalItem.ItemId} 
                                       ref = {(el) => (itemsRefs.current[globalItem.ItemId] = el)}
                                       className={`mx-2 my-4 px-2 py-2 shadow-lg cursor-pointer border-2 transition-all duration-200 ${
-                                      selectedItem === globalItem.ItemId
+                                      selectedItem?.ItemId === globalItem.ItemId
                                           ? 'border-tag-lp'
                                           : 'border-tag-l5'
                                       }`}
-                                      onClick={()=> setSelectedItem(globalItem.ItemId)}
+                                      onClick={()=> setSelectedItem(globalItem)}
                                       whileTap={{scale:0.95}}
                                       whileHover = {{scale:1.05, boxShadow:"0px,0px,10px rgba(0,0,0,0.3)"}}
                                       transition={{type: "spring", stiffness: 300}}>
@@ -871,7 +918,6 @@ useEffect(() => {
                               <span className="font-semibold ml-4">₹{selectItemForBid.CurrentBid}</span> </p>
                             <input
                             type="number"
-                            placeholder="Enter your bid"
                             value={userBid}
                             onChange={(e) => setUserBid(Number(e.target.value))}
                             className="w-[40%] px-4 py-2 border-b bg-transparent text-center h-8 "
@@ -884,24 +930,38 @@ useEffect(() => {
                             className="md:w-40 w-[220px] h-12 border rounded-3xl bg-[#EBDDD3] text-[#3A1C32] font-bold dark:bg-[#3A1C32] dark:text-[#EBDDD3]">Contact Sellor</motion.button>
                             <motion.button 
                             whileHover={{ scale: 1.05 }}
+
                             onClick={() => {
-                            const totalBid = selectItemForBid.CurrentBid + userBid;
+                            if (String(selectItemForBid.SellerId) === String(userId)) {
+                              console.log("BLOCKED: own item");
+                              toast.error("You can't raise bid on your own item.");
+                              return;
+                            }
+                            if(userBid <=0){
+                              toast.error("Please enter a valid bid amount");
+                              return;
+                            }
                             axios.post("https://localhost:7269/api/Item/RaiseBid", {
                                 itemId: selectItemForBid.ItemId,
-                                newBid: totalBid,
+                                newBid: userBid,
                                 userId: userId
-                            })
-                            .then(res => {
+                              })
+                              .then(res => {
                                 const updated = { ...selectItemForBid, CurrentBid: res.data.newBid };
                                 setSelectItemForBid(updated);
-                                setCurrentBid(res.data.newBid);
                                 setUserBid(0);
-                                toast.success("Bid is raised successfully.",
-                                        {
-                                          duration:10000,
-                                        });
-                            })
-                            .catch(err => console.error("Bid failed", err));
+                                toast.success(res.data.message || "🎯 Bid raised successfully!");
+                              })
+                              .catch(err => {
+                                const errData = err.response?.data;
+                                const errMsg =
+                                  typeof errData === "string"
+                                    ? errData
+                                    : errData?.message || errData?.title || "❌ Bid failed. Try again!";
+                                
+                                toast.error(errMsg);
+                                console.error("Bid failed:", errMsg);
+                              });
                             }}
 
                             className="md:w-40 w-[220px] h-12 border rounded-3xl bg-[#EBDDD3] text-[#3A1C32] font-bold dark:bg-[#3A1C32] dark:text-[#EBDDD3]">Raise Bid</motion.button>
@@ -918,7 +978,7 @@ useEffect(() => {
             )}
 
       {showNotifications && (
-        <div className="fixed top-[160px] left-5 bg-white p-4 rounded shadow-lg z-50 w-[300px]">
+        <div className="fixed top-[160px] left-5 bg-white p-4 rounded shadow-lg z-50 w-[300px] h-[600px] overflow-y-auto scrollbar-hide">
           {notifications.length === 0 ? (
             <p>No notifications</p>
           ) : (
@@ -932,7 +992,7 @@ useEffect(() => {
             initial="hidden"
             animate="visible"
             exit="exit"
-                className=" mb-2 shadow-lg h-12 w-[260px] border-gray-100 grid gap-0 ">
+                className="cursor-pointer mb-2 shadow-lg h-auto w-[260px] border-gray-100 grid gap-0 ">
                   <h1 className="text-sm mx-4 text-black font-semibold">
                     {n.Message} 
                   </h1>

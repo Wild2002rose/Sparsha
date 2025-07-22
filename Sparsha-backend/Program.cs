@@ -9,6 +9,7 @@ using Microsoft.IdentityModel.Tokens;
 using Sparsha_backend.Data;
 using Sparsha_backend.Models;
 using Sparsha_backend.Services;
+using QuestPDF.Infrastructure;
 
 namespace Sparsha_backend
 {
@@ -17,10 +18,10 @@ namespace Sparsha_backend
         public static void Main(string[] args)
         {
             var builder = WebApplication.CreateBuilder(args);
-
+            QuestPDF.Settings.License = LicenseType.Community;
             //Add services to the container.
 
-           builder.Services.AddSingleton<TwilioService>();
+            builder.Services.AddSingleton<TwilioService>();
             builder.Services.Configure<EmailSettings>(
                 builder.Configuration.GetSection("EmailSettings")
             );
@@ -80,8 +81,8 @@ namespace Sparsha_backend
                 });
             }
 
-
-
+            builder.Services.AddHostedService<BiddingLockService>();
+            builder.Services.AddScoped<RazorPayService>();
 
             var app = builder.Build();
             app.UseCors("AllowAll");

@@ -10,6 +10,10 @@ import { useAuth } from "./AuthContext";
 import {Toaster, toast} from 'react-hot-toast';
 import {motion, scale, AnimatePresence} from 'framer-motion';
 import { requestNotificationPermission } from '../firebase-messaging';
+import CountDownTimer from "./CountDownTimer";
+import { useDispatch, useSelector } from "react-redux";
+import { addToCart } from "../redux/slices/cartSlice";
+import { addToWishlist, removeFromWishlist, setWishlist } from "../redux/slices/wishlistSlice";
 
 function Nav() {
     const [menuOpen, setMenuOpen] = useState(false);
@@ -19,6 +23,7 @@ function Nav() {
     useEffect (() => {
         function handleClickOutside(event) {
             if(dropDownRef.current && !dropDownRef.current.contains(event.target)){
+                setAbout(false);
                 setShowUser(false);
                 setShowCategories(false);
                 setShowRegister(false);
@@ -48,6 +53,11 @@ function Nav() {
     const [search, setSearch] = useState(false);
     const handleClick = () => {
         setSearch(true);
+    }
+
+    const [about, setAbout] = useState(false);
+    const handleAboutClick = () => {
+        setAbout(true);
     }
 
 // item controller part
@@ -115,15 +125,16 @@ function Nav() {
     const handleCart = () => {
         navigate('/cart');
     }
-    const [wishlist, setWishlist] = useState([]);
-    const addToWishlist = async () => {
+    const dispatch = useDispatch();
+    const wishlist = useSelector((state) => state.wishlist.wishlistItems);
+    const handleAddToWishlist = async () => {
     try {
         const userId = localStorage.getItem("userId"); 
         if (!userId || !selectedItem) {
             console.warn("User ID or selected item is missing");
             return;
         }
-
+        
         const response = await axios.post("https://localhost:7269/api/Item/wishlist/add", {
             userId: userId,
             itemId: selectedItem 
@@ -141,8 +152,7 @@ function Nav() {
     const fetchWishlist = async (userId) => {
         try {
             const response = await axios.get(`https://localhost:7269/api/Item/wishlist/${userId}`);
-            setWishlist(response.data);
-            console.log(response.data);
+            dispatch(setWishlist(response.data));
         } catch(error) {
             console.error("Error fetching wishlist", error);
         }
@@ -169,6 +179,7 @@ function Nav() {
                     const updated = prevWishlist.filter(item => item.ItemId !== itemId);
                     return updated;
                 });
+                dispatch(removeFromWishlist({userId,itemId}))
                 toast.info("Item removed from wishlist!");
             } else {
                 const {data: newItem} = await axios.post("https://localhost:7269/api/Item/wishlist/add",
@@ -181,6 +192,7 @@ function Nav() {
                     const updated = [...prevWishlist, added];
                     return updated;
                 });
+                dispatch(addToWishlist({userId,itemId}))
                 toast.success("Item added to wishlist!");
             }
         } catch (error) {
@@ -188,7 +200,7 @@ function Nav() {
             toast.error("Something went wrong. Please try again.");
         }
     };
-    const [cartItems, setCartItems] = useState([]);
+    const cartItems = useSelector((state) => state.cart.items);
     const quantity =1;
     const addItemToCart = async (userId,itemId, quantity) => {
         try {
@@ -197,11 +209,11 @@ function Nav() {
                 itemId: itemId,
                 quantity: quantity
             });
-            console.log("Item added:", response.data);
+            dispatch(addToCart({userId,itemId,quantity}))
             toast.success("Item is added to cart!");
         } catch (error) {
             console.error("Error adding to cart:", error.response?.data||error.message);
-            toast.info("Error to add!");
+            toast.error("Error to add!");
         }
     };
     
@@ -351,7 +363,7 @@ function Nav() {
     },[]);
 
     const detailsRef = useRef(null);
-        const [userBid, setUserBid] = useState(0);
+        const [userBid, setUserBid] = useState();
         const [currentBid, setCurrentBid] = useState(null);
         const [selectItemForBid, setSelectItemForBid] = useState(null);
     
@@ -367,6 +379,23 @@ function Nav() {
             };
         }, [detailsRef]);
 
+const listVariants = {
+  hidden: { opacity: 0, y: 10 },
+  visible: (i) => ({
+    opacity: 1,
+    y: 0,
+    transition: {
+      delay: i * 0.05, 
+      duration: 0.3,
+      ease: "easeOut",
+    },
+  }),
+};
+useEffect(() => {
+  if (selectItemForBid) {
+    setUserBid(selectItemForBid.CurrentBid || 0);
+  }
+}, [selectItemForBid]);
 
     return (
         <>
@@ -376,15 +405,34 @@ function Nav() {
         <div className="fixed z-50 w-full flex flex-row shadow-lg items-center justify-between 
             h-[80px] px-10 dark:bg-black dark:text-tag-l bg-tag-l4 text-tag-dp top-0 left-0">
           
-            <div className="text-4xl font-alex w-[40%] font-semibold">
-                Sparsha
+            <div className="text-4xl font-alex w-fit font-semibold">
+                <motion.h1 
+                animate={{
+                y: [0, -10, 0],
+                }}
+                transition={{
+                duration: 2,
+                repeat: Infinity,
+                ease: "easeInOut"
+                }}
+
+                style={{
+                    textShadow: `
+                    1px 1px 0 #bbb,
+                    2px 2px 0 #aaa,
+                    3px 3px 0 #999,
+                    4px 4px 0 #888,
+                    5px 5px 0 #777
+                    `,
+                }}>Sparsha</motion.h1>
             </div>
 
             <div className="hidden md:flex items-center space-x-10 w-[50%] font-semibold text-lg mr-4">
                 <Link to="/">
                 <h1 className="cursor-pointer dark:hover:text-tag-dp hover:text-tag-dark">Home</h1>
                 </Link>
-                <h1 className="cursor-pointer dark:hover:text-tag-dp hover:text-tag-dark">About</h1>
+                <h1 onClick = {setAbout}
+                className="cursor-pointer dark:hover:text-tag-dp hover:text-tag-dark">About</h1>
                 <h1 className="cursor-pointer dark:hover:text-tag-dp hover:text-tag-dark"
                 onClick={() => setShowCategories(!showCategories)}>
                     Categories
@@ -417,8 +465,13 @@ function Nav() {
             {menuOpen && (
             <div className="fixed flex flex-col gap-6 py-10 md:hidden font-semibold text-md items-center 
             dark:bg-black bg-tag-l4 dark:text-tag-l text-tag-dp w-60 h-[480px] top-[80px] ml-[180px]">
-                <div><h1 className="cursor-pointer dark:hover:text-tag-dp hover:text-tag-dark">Home</h1></div>
-                <div><h1 className="cursor-pointer dark:hover:text-tag-dp hover:text-tag-dark">About</h1></div>
+                <div>
+                    <Link to="/">
+                    <h1 className="cursor-pointer dark:hover:text-tag-dp hover:text-tag-dark">Home</h1>
+                    </Link>
+                </div>
+                <div><h1 onClick={setAbout}
+                className="cursor-pointer dark:hover:text-tag-dp hover:text-tag-dark">About</h1></div>
                 <div><h1 onClick={() => setShowCategories(!showCategories)}
                 className="cursor-pointer dark:hover:text-tag-dp hover:text-tag-dark">Categories</h1></div>
                 <div><h1 className="cursor-pointer dark:hover:text-tag-dp hover:text-tag-dark">Contact</h1></div>
@@ -440,6 +493,24 @@ function Nav() {
             </div>
         )}
 
+        { about &&
+            <motion.div ref={dropDownRef}
+            initial={{ opacity: 0, y: 40 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: 20 }}
+            transition={{ duration: 0.6, ease: "easeOut" }}
+            className="fixed dark:bg-pink-100 bg-tag-l5 border dark:border-tag-lp border-tag-l4 h-auto md:w-[600px] w-[400px] md:mt-[23%] mt-[100%] md:ml-[38%] ml-[2px] rounded-lg shadow-md ">
+                <p className="px-10 py-10 font-semibold text-md text-tag-dark">
+                    <span className="text-tag-lp font-bold text-3xl mr-4">Sparsha</span> 
+                    is an innovative online marketplace that connects buyers and sellers 
+                    through both bidding and fixed-price listings. Whether you're looking to win 
+                    an auction or shop directly, Sparsha provides a seamless and engaging experience.
+                    Sellers can showcase their items, set prices or auction them, while buyers enjoy 
+                    transparent bidding, real-time notifications, and secure purchasing — all in one place.
+                </p>
+            </motion.div>
+        }
+
         {search && (
             <div className="fixed dark:bg-pink-100 bg-tag-l2 border dark:border-tag-lp border-tag-l4 h-[120px] md:w-[400px] w-[400px] md:mt-[50%] mt-[100%] md:ml-[38%] ml-[2px] rounded-lg shadow-md ">
                 <FaTimes className="text-tag-dark cursor-pointer hover:text-tag-lp"
@@ -452,14 +523,26 @@ function Nav() {
         )}
 
         {showUser && (
-            <div ref={dropDownRef}
+            <motion.div ref={dropDownRef}
+            initial={{ opacity: 0, y: -20, scale: 0.95 }}
+            animate={{ opacity: 1, y: 0, scale: 1 }}
+            exit={{ opacity: 0, y: -10, scale: 0.95 }}
+            transition={{ duration: 0.4, ease: "easeOut" }}
             className="fixed md:ml-[73%] ml-[10%] h-auto w-[300px] bg-gradient-to-b from-tag-l3 to-tag-l2 
             border border-tag-l rounded-lg z-10 top-20">
                     
                     {user && user.userName ? ( 
                     <>
                     <div className="ml-6 mr-6 py-6 border-b border-tag-light">
-                        <h1 className="text-gray-700 font-semibold text-xl">Welcome, <span className="text-tag-lp font-semibold">{user.userName} </span></h1>
+                        <h1 className="text-gray-700 font-semibold text-xl">Welcome
+                            <span className="ml-4 relative text-tag-lp font-extrabold text-xl inline-block 
+                                drop-shadow-[2px_2px_0px_#d1d5db] 
+                                dark:drop-shadow-[2px_2px_0px_#1f2937] 
+                                transform hover:scale-105 transition duration-300 ease-in-out">
+                            {user.userName}
+                            </span>
+
+                            </h1>
                         <p className="text-tag-dark text-sm mt-2">Manage your account and orders</p>
                     </div>
                     <div className="ml-6 mr-6 py-4 font-normal text-md text-tag-dark space-y-2">
@@ -503,7 +586,7 @@ function Nav() {
                     )}
                 
                 
-            </div>
+            </motion.div>
         )}
 
         {showRegister && (
@@ -640,7 +723,11 @@ function Nav() {
         )}
 
         {showCategories && (
-            <div ref={dropDownRef}
+            <motion.div ref={dropDownRef}
+            initial={{ opacity: 0, y: -20, scale: 0.95 }}
+            animate={{ opacity: 1, y: 0, scale: 1 }}
+            exit={{ opacity: 0, y: -10, scale: 0.95 }}
+            transition={{ duration: 0.4, ease: "easeOut" }}
             className="absolute md:ml-[54%] ml-[25%] h-[450px] w-[300px] text-tag-dark font-semibold 
             bg-gradient-to-b from-tag-l3 to-tag-l2 border border-tag-l rounded-lg py-6 top-20 z-10
             fixed"
@@ -648,16 +735,21 @@ function Nav() {
             {Array.isArray(categories) && categories.map((category,index) => (
                 <ul key={index}
                 className="px-10">
-                    <li 
+                    <motion.li 
+                    custom={index}
+                    variants={listVariants}
+                    initial="hidden"
+                    animate="visible"
+                    whileHover={{ scale: 1.05, color: "#D4AF37" }}
                     onClick = {() => {
                         setSelectedCategory(category.Category_Name);
                         setShowCategories(false);
                         setShowItems(true);
                     }}
-                    className="py-1 hover:text-tag-lp cursor-pointer border-b border-tag-l2 shadow-md text-center">{category.Category_Name}</li>
+                    className="py-1 hover:text-tag-lp cursor-pointer border-b border-tag-l2 shadow-md text-center">{category.Category_Name}</motion.li>
                 </ul>
             ))}
-            </div>
+            </motion.div>
         )}
 
         {showItems && (
@@ -669,48 +761,96 @@ function Nav() {
                 <div className="md:flex md:gap-20 grid gap-0">
 
                     <div className="md:w-[75%] w-[90%]">
-                    {Array.isArray(item) && item.length > 0 ? (
-                        item.map((i,index) => (
+                    {selectedItem ? (
+                        
 
-                        <div key={i.ItemId} className="border dark:border-tag-b2 border-tag-l5 dark:bg-black bg-tag-l5 shadow-lg md:p-10 p-4
+                        <div key={selectedItem.ItemId} className="border dark:border-tag-b2 border-tag-l5 dark:bg-black bg-tag-l5 shadow-lg md:p-10 p-4
                          rounded-xl  md:h-[450px] h-[450px] md:w-[1000px] w-[400px] md:mt-[30px] md:ml-[50px] ml-[10px] md:flex md:gap-10">
                         <div className="md:w-[580px] md:h-[480px] w-[360px] h-[180px] relative overflow-hidden ">
-                            <img src={`https://localhost:7269${i.ImagePath}`} alt={i.Name} className=" object-cover w-full h-[78%]" />
+                            <img src={`https://localhost:7269${selectedItem.ImagePath}`} alt={selectedItem.Name} className=" object-cover w-full h-[78%]" />
                         </div>
                         <div className="md:w-[450px] w-[360px]">
-                            <h2 className="text-2xl font-bold md:py-2 text-center text-tag-lp">{i.Name}</h2>
+                            <h2 className="text-2xl font-bold md:py-2 text-center text-tag-lp">{selectedItem.Name}</h2>
                             <p className="text-sm text-tag-dark dark:text-tag-l2 md:mt-4 mt-2 md:h-[150px] h-[80px]">
-                            {i.Description} 
+                            {selectedItem.Description} 
                             </p>
+                            <p className="">
+                                  { !selectedItem.IsFixedPrice && (
+                                      <CountDownTimer endTime={new Date(selectedItem.BiddingEndTime)} />
+                                  )}
+                                  </p>
                         <div className="flex justify-between items-center">
                             <div className="grid md:py-6 py-4">
-                            <p className="text-tag-dark dark:text-tag-l2 font-bold">Current Bid: <span className="text-tag-lp"> ₹ {i.CurrentBid}</span></p>
+                            {selectedItem.IsFixedPrice ? (
+                                <p className="text-tag-dark dark:text-tag-l2 font-bold">
+                                    Price : <span className="text-tag-lp"> ₹ {selectedItem.Price}</span></p>
+                            ) : ( 
+                                <p className="text-tag-dark dark:text-tag-l2 font-bold">
+                                    Current Bid: <span className="text-tag-lp"> ₹ {selectedItem.CurrentBid}</span></p>
+                            )}
                             </div>
                             <div>
                             <FaHeart
                             size={24}
                             className={`cursor-pointer transition-all duration-300 ${
-                                inWishlist(i.ItemId) ? "text-red-500" : "text-white"
+                                inWishlist(selectedItem.ItemId) ? "text-red-500" : "text-white"
                             }`}
                             onClick={() =>{ 
-                                toggleWishlist(i.ItemId); 
+                                toggleWishlist(selectedItem.ItemId); 
                             }}
                             />
                             </div>
                         </div>
-                        <div className="flex justify-between items-center">
+
+                        {/* <div className="flex justify-between items-center">
                             <button className="h-10 w-40 bg-tag-lp rounded-3xl text-tag-l2 font-semibold hover:bg-tag-l2 hover:text-tag-lp"
                             onClick={() => {
-                            setSelectItemForBid(i);
+                            setSelectItemForBid(selectedItem);
                             }}
                             >Raise Bid</button>
                             <button className="h-10 w-40 bg-tag-lp rounded-3xl text-tag-l2 font-semibold hover:bg-tag-l2 hover:text-tag-lp"
-                            onClick = {() => addItemToCart(userId,i.ItemId,quantity)}>Add to cart</button>
+                            onClick = {() => addItemToCart(userId,selectedItem.ItemId,quantity)}>Add to cart</button>
+                        </div> */}
+                        <div className="flex justify-between items-center">
+                        {selectedItem.IsFixedPrice ? (
+                            <>
+                            <button
+                                className="h-10 w-40 bg-tag-l2 rounded-3xl text-tag-dark font-semibold hover:bg-tag-l hover:text-tag-l2"
+                                onClick={() => toggleWishlist(selectedItem.ItemId)}
+                            >
+                                {inWishlist(selectedItem.ItemId) ? "Wishlisted" : "Add to Wishlist"}
+                            </button>
+                            <button
+                                className="h-10 w-40 bg-tag-lp rounded-3xl text-tag-l2 font-semibold hover:bg-tag-l2 hover:text-tag-lp"
+                                onClick={() => addItemToCart(userId, selectedItem.ItemId, quantity)}
+                            >
+                                Add to Cart
+                            </button>
+                            </>
+                        ) : (
+                            <>
+                            <button
+                                className="h-10 w-40 bg-tag-lp rounded-3xl text-tag-l2 font-semibold hover:bg-tag-l2 hover:text-tag-lp"
+                                onClick={() => {
+                                setSelectItemForBid(selectedItem);
+                                }}
+                            >
+                                Raise Bid
+                            </button>
+                            <button
+                                className="h-10 w-40 bg-tag-l2 rounded-3xl text-tag-dark font-semibold hover:bg-tag-l hover:text-tag-l2"
+                                onClick={() => toggleWishlist(selectedItem.ItemId)}
+                            >
+                                {inWishlist(selectedItem.ItemId) ? "Wishlisted" : "Add to Wishlist"}
+                            </button>
+                            </>
+                        )}
                         </div>
+
+
                         </div>
                         </div>
                         
-                            ))
                         ) : (
                             <p className="text-center font-semibold p-10">No items found</p>
                         )}
@@ -724,11 +864,11 @@ function Nav() {
                                 key={globalItem.ItemId} 
                                 ref = {(el) => (itemsRefs.current[globalItem.ItemId] = el)}
                                 className={`mx-2 my-4 px-2 py-2 shadow-lg cursor-pointer border-2 transition-all duration-200 ${
-                                selectedItem === globalItem.ItemId
+                                selectedItem?.ItemId === globalItem.ItemId
                                     ? 'border-tag-lp'
                                     : 'border-tag-l5'
                                 }`}
-                                onClick={()=> setSelectedItem(globalItem.ItemId)}
+                                onClick={()=> setSelectedItem(globalItem)}
                                 whileTap={{scale:0.95}}
                                 whileHover = {{scale:1.05, boxShadow:"0px,0px,10px rgba(0,0,0,0.3)"}}
                                 transition={{type: "spring", stiffness: 300}}>
@@ -768,7 +908,6 @@ function Nav() {
                               <span className="font-semibold ml-4">₹{selectItemForBid.CurrentBid}</span> </p>
                             <input
                             type="number"
-                            placeholder="Enter your bid"
                             value={userBid}
                             onChange={(e) => setUserBid(Number(e.target.value))}
                             className="w-[40%] px-4 py-2 border-b bg-transparent text-center h-8 "
@@ -784,10 +923,20 @@ function Nav() {
                             disabled={!selectItemForBid}
                             onClick={() => {
                                 if(!selectItemForBid) return;
-                            const totalBid = selectItemForBid.CurrentBid + userBid;
+                                if (String(selectItemForBid.SellerId) === String(userId)) {
+                                console.log("BLOCKED: own item");
+                                toast.error("You can't raise bid on your own item.");
+                                return;
+                                }
+
+                                if (userBid <= 0) {
+                                toast.error("Please enter a valid bid amount");
+                                return;
+                                }
+                            //const totalBid = selectItemForBid.CurrentBid + userBid;
                             axios.post("https://localhost:7269/api/Item/RaiseBid", {
                                 itemId: selectItemForBid.ItemId,
-                                newBid: totalBid,
+                                newBid: userBid,
                                 userId: userId
                             })
                             .then(res => {
@@ -800,7 +949,16 @@ function Nav() {
                                           duration:10000,
                                         });
                             })
-                            .catch(err => console.error("Bid failed", err));
+                            .catch(err => {
+                                const errData = err.response?.data;
+                                const errMsg =
+                                    typeof errData === "string"
+                                    ? errData
+                                    : errData?.message || errData?.title || "❌ Bid failed. Try again!";
+                                
+                                toast.error(errMsg);
+                                console.error("Bid failed:", errMsg);
+                                });
                             }}
 
                             className="md:w-40 w-[220px] h-12 border rounded-3xl bg-[#EBDDD3] text-[#3A1C32] font-bold dark:bg-[#3A1C32] dark:text-[#EBDDD3]">Raise Bid</motion.button>

@@ -5,6 +5,7 @@ import axios from "axios";
 import {Toaster, toast} from 'react-hot-toast';
 import Carousel from "react-multi-carousel";
 import "react-multi-carousel/lib/styles.css";
+import { form } from "framer-motion/client";
 
 function ItemsOfSeller() {
     const dropDownRef = useRef(null);
@@ -42,17 +43,25 @@ function ItemsOfSeller() {
     },[]);
     const userId = localStorage.getItem("sellerId");
     const [formData, setFormData] = useState({
-        sellerId: '',
+        sellerId: localStorage.getItem("userId") || '',
         name: '',
         categoryName: '',
         description: '',
         myPrice: '',
         currentBid: '',
+        isFixedPrice: false,
+        biddingDays: ''
     });
     const [image, setImage] = useState(null);
     const handleChange = (e) => {
         setFormData({...formData,[e.target.name]:e.target.value});
     };
+    useEffect(() => {
+    const storedId = localStorage.getItem("sellerId");
+    if (storedId) {
+        setFormData((prev) => ({ ...prev, sellerId: storedId }));
+    }}, []);
+
     const handleImageChange = (e) => {
         if (e.target.files && e.target.files.length > 0) {
             setImage(e.target.files[0]);
@@ -62,6 +71,9 @@ function ItemsOfSeller() {
     };
     const handleFormSubmit = async (e) => {
         e.preventDefault();
+        if (!image) {
+        setError("Please select an image.");
+        return;}
         const data = new FormData();
         data.append('SellerId', formData.sellerId);
         data.append('Name', formData.name);
@@ -69,6 +81,10 @@ function ItemsOfSeller() {
         data.append('Description', formData.description);
         data.append('MyPrice', formData.myPrice);
         data.append('CurrentBid', formData.currentBid);
+        data.append('IsFixedPrice', formData.isFixedPrice);
+        if(!formData.isFixedPrice && formData.biddingDays){
+            data.append('BiddingDays', formData.biddingDays);
+        }
         data.append('Image', image);
 
         try {
@@ -156,14 +172,14 @@ function ItemsOfSeller() {
         </div>
         <End/>
 
-        {showForm && (
+        {showForm &&(
             <form onSubmit={handleFormSubmit} ref={dropDownRef}
             className="fixed dark:bg-tag-l2 bg-tag-l2 border-2 dark:border-tag-light border-tag-light md:h-[600px] h-[600px] 
             md:w-[500px] w-[380px] md:ml-[35%] ml-9 md:top-[120px] top-20 rounded-lg z-50 md:p-10 p-6 grid gap-4">
             <div className="font-bold text-2xl text-tag-lp border-b-2 border-tag-light text-center h-10">
                 <h1 className="">Upload Your Item</h1>
             </div>
-            <input type="text" name="sellerId" placeholder="Seller ID" onChange={handleChange} className="text-center border border-tag-l4"/>
+            <input type="text" name="sellerId" placeholder="Seller ID" value={formData.sellerId} readOnly className="text-center border border-tag-l4"/>
             <input type="text" name="name" placeholder="Name" onChange={handleChange} className="text-center border border-tag-l4"/>
             <select className="text-center border border-tag-l4" value={selectedCategory}
             onChange={(e) => {
@@ -178,6 +194,33 @@ function ItemsOfSeller() {
             </select>
             <input type="text" name="description" placeholder="Description" onChange={handleChange} className="text-center border border-tag-l4"/>
             <input type="number" name="myPrice" placeholder="My Price" onChange={handleChange} className="text-center border border-tag-l4"/>
+            <label className="flex items-center gap-2 text-tag-dark font-medium">
+            <input
+                type="checkbox"
+                name="isFixedPrice"
+                checked={formData.isFixedPrice}
+                onChange={(e) =>
+                setFormData((prev) => ({
+                    ...prev,
+                    isFixedPrice: e.target.checked,
+                }))
+                }
+            />
+            Fixed Price (No Bidding)
+            </label>
+            {!formData.isFixedPrice && (
+                <select
+                    name="biddingDays"
+                    onChange={handleChange}
+                    className="text-center border border-tag-l4"
+                >
+                    <option value="">Select Bidding Duration (days)</option>
+                    <option value="7">7 Days</option>
+                    <option value="15">15 Days (Default)</option>
+                    <option value="30">30 Days</option>
+                </select>
+            )}
+
             <input type="file" name="image" onChange={handleImageChange} accept="image/*" className="mt-4"/>
             <button type="submit" className="h-10 w-60 bg-tag-l5 text-center text-white hover:text-tag-lp font-bold rounded-3xl md:ml-[90px] ml-[40px] mt-4">Upload</button>
             </form>

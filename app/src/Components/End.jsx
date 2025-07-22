@@ -1,5 +1,6 @@
 import { FaFacebook, FaInstagram, FaPhone,FaYoutube,  } from "react-icons/fa";
 import { HiOutlineMail } from "react-icons/hi";
+import {motion} from "framer-motion";
 function End() {
     const links = [
         {
@@ -51,15 +52,24 @@ function End() {
             <div className="flex gap-4 md:ml-[40%] ml-[18%]">
                 <ul className="flex items-center jutify-center space-x-5 py-12">
                     {links.map(({ id, src, href }) => (
-                    <li
+                    <motion.li
                     key={id}
-                    className="py-2.5 md:py-3 px-2.5 md:px-3 rounded-full border-2 border-tag-dark  cursor-pointer text-tag-dark hover:scale-105 
+                    animate={{
+                        y: [0,-12,0],
+                    }}
+                    transition = {{
+                        duration:2,
+                        repeat: Infinity,
+                        ease: "easeInOut",
+                        delay: id*0.2,
+                    }}
+                    className="drop-shadow-lg py-2.5 md:py-3 px-2.5 md:px-3 rounded-full border-2 border-tag-dark  cursor-pointer text-tag-dark hover:scale-105 
                     hover:border-tag-lp hover:text-tag-lp dark:hover:text-tag-lp dark:hover:border-tag-lp dark:text-tag-l2 dark:border-tag-l2 "
                     >
                     <a href={href} target="blank">
                         <>{src}</>
                     </a>
-                    </li>
+                    </motion.li>
                 ))}
                 </ul>
             </div>
