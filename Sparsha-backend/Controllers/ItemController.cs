@@ -45,11 +45,11 @@ namespace Sparsha_backend.Controllers
             public string DeviceToken { get; set; }
         }
 
-        [HttpPost("SendLoginNotification")]
-        public async Task SendLoginNotification(string userId, string message)
-        {
-            await _hubContext.Clients.User(userId).SendAsync("ReceiveNotification", message);
-        }
+        //[HttpPost("SendLoginNotification")]
+        //public async Task SendLoginNotification(string userId, string message)
+        //{
+        //    await _hubContext.Clients.User(userId).SendAsync("ReceiveNotification", message);
+        //}
 
         [HttpGet("GetCategory")]
         public async Task<IActionResult> GetCategories()
@@ -645,6 +645,9 @@ namespace Sparsha_backend.Controllers
                 message = "Order placed successfully"
             });
         }
+
+        
+
 
 
 

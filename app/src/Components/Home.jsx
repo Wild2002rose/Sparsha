@@ -2,6 +2,8 @@ import React, { useEffect, useState, useRef } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { addToCart } from "../redux/slices/cartSlice";
 import { addToWishlist, removeFromWishlist } from "../redux/slices/wishlistSlice";
+import { markAsRead } from "../redux/slices/notificationSlice";
+import {v4 as uuidv4} from 'uuid';
 import { FaBell, FaTimes, FaHeart } from "react-icons/fa";
 import {Toaster, toast} from 'react-hot-toast';
 import Nav from "./Nav";
@@ -17,6 +19,7 @@ import { motion, AnimatePresence, } from "framer-motion";
 import axios from "axios";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "./AuthContext";
+import Notification from "./Notification";
 
 import f2 from "../Assets/f2.jpg";
 import j2 from "../Assets/j2.jpg";
@@ -36,21 +39,6 @@ import End from "./End";
 import CountDownTimer from "./CountDownTimer";
 
 function Home() {
-  const itemVariants = {
-    hidden: { opacity: 0, y: 30, scale: 0.95 },
-    visible: (i) => ({
-      opacity: 1,
-      y: 0,
-      scale: 1,
-      transition: {
-        delay: i * 0.1,
-        duration: 0.5,
-        type: "spring",
-        stiffness: 80,
-      },
-    }),
-    exit: { opacity: 0, x: -50, scale: 0.9 },
-  };
   const dropDownRef = useRef(null);
   const [error, setError] = useState('');
   const [email, setEmail] = useState('');
@@ -393,47 +381,6 @@ useEffect(() => {
         };
     }, [detailsRef]);
     
-    const bellRef = useRef();
-
-  useEffect(() => {
-    const handleNotification = (e) => {
-      const msg = e.detail;
-      const audio = new Audio("/notification.mp3");
-      audio.volume = 1.0;
-      audio.play().catch(err => console.warn("🔇 Sound error:", err));
-
-      if (bellRef.current) {
-        bellRef.current.classList.add("animate-ping-bell");
-        setTimeout(() => bellRef.current.classList.remove("animate-ping-bell"), 3000);
-      }
-    };
-
-    window.addEventListener("play-notification", handleNotification);
-    return () => window.removeEventListener("play-notification", handleNotification);
-  }, []);
-
-const [notifications, setNotifications] = useState([]);
-const [showNotifications, setShowNotifications] = useState(false);
-const fetchNotifications = async (userId) => {
-  try {
-    const res = await axios.get(`https://localhost:7269/api/Auth/GetNotification/${userId}`);
-    setNotifications(res.data);
-    console.log(res.data);
-  } catch (err) {
-    console.error("❌ Error fetching notifications:", err);
-  }
-};
-useEffect(() => {
-  const storedUserId = localStorage.getItem("userId");
-  if (storedUserId) {
-    setUserId(storedUserId);
-    fetchNotifications(storedUserId);
-  } else {
-    console.warn("⚠️ No valid userId in localStorage");
-  }
-}, []);
-
-  
 
   return (
     <>
@@ -441,6 +388,7 @@ useEffect(() => {
       <Toaster position = "bottom-left" reverseOrder = {true} className="" toastOptions={{
         duration: 10000,
       }}/>
+      <Notification/>
       <div className="bg-gradient-to-b from-tag-l2 to-tag-l3 md:px-16 px-10 py-40 md:flex grid md:gap-20 gap-10
       dark:bg-gradient-to-b dark:from-tag-black dark:to-tag-dark md:h-[540px] h-[800px] w-full">
         <div>
@@ -761,20 +709,6 @@ useEffect(() => {
         </motion.div>
       )}
 
-      <button 
-      ref = {bellRef} 
-      className="fixed md:top-[100px] top-[100px] left-5  p-3 rounded-full shadow-lg transition"
-      >
-        <FaBell 
-        id="notification-bell"
-        onClick={() => {
-        console.log("🔔 userId:", userId);
-      setShowNotifications(!showNotifications);
-      fetchNotifications(userId); 
-      }}
-        className="h-5 w-5 dark:text-tag-l2 text-dark dark:hover:text-tag-lp hover:text-tag-lp animate-ring" />
-      </button>
-
       {showItems && (
                   <div className="fixed md:h-[620px] h-[1200px] md:w-[92%] w-[95%] bg-tag-l3 top-10 md:mx-5 left-2 md:my-20 my-10">
                       <div className="flex justify-between items-center px-6 py-6">
@@ -976,41 +910,6 @@ useEffect(() => {
                     </div>
                 </motion.div>
             )}
-
-      {showNotifications && (
-        <div className="fixed top-[160px] left-5 bg-white p-4 rounded shadow-lg z-50 w-[300px] h-[600px] overflow-y-auto scrollbar-hide">
-          {notifications.length === 0 ? (
-            <p>No notifications</p>
-          ) : (
-            <ul>
-              <AnimatePresence>
-                {notifications.map((n,index) => (
-                <motion.li 
-                key={n.Id} 
-                custom={index}
-                variants={itemVariants}
-            initial="hidden"
-            animate="visible"
-            exit="exit"
-                className="cursor-pointer mb-2 shadow-lg h-auto w-[260px] border-gray-100 grid gap-0 ">
-                  <h1 className="text-sm mx-4 text-black font-semibold">
-                    {n.Message} 
-                  </h1>
-                  <h1 className="mx-4 flex justify-center gap-[100px]">
-                    <span className="text-xs text-gray-500">
-                    {n.CreatedAt.slice(0,10)}
-                    </span>
-                    <span className="text-xs text-gray-500">
-                      {n.CreatedAt.slice(11,19)}
-                    </span>
-                  </h1>
-                </motion.li>
-              ))}
-              </AnimatePresence>
-            </ul>
-          )}
-        </div>
-      )}
 
     </>
   );

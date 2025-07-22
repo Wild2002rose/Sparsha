@@ -356,21 +356,7 @@ namespace Sparsha_backend.Controllers
             return Ok(new { email = user.Email });
         }
 
-        [HttpGet("GetNotification/{userId}")]
-        public async Task<IActionResult> GetNotification(string userId)
-        {
-            var notifications = await _itemDbContext.Notifications
-                .Where(n => n.OwnerId == userId)
-                .OrderByDescending(n => n.CreatedAt)
-                .ToListAsync();
-
-            if (notifications == null || !notifications.Any())
-            {
-                return NotFound(new { message = "No notifications found" });
-            }
-
-            return Ok(notifications); 
-        }
+        
 
 
 
