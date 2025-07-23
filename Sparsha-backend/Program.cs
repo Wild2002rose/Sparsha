@@ -51,7 +51,6 @@ namespace Sparsha_backend
             builder.Services.AddAuthentication(options =>
             {
                 options.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
-                //options.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
             })
                 .AddJwtBearer(options =>
                 {
@@ -65,7 +64,7 @@ namespace Sparsha_backend
                         ValidAudience = jwtSettings["Audience"],
                         RequireExpirationTime = true,
                         IssuerSigningKey = new SymmetricSecurityKey(
-                            Encoding.UTF8.GetBytes("MyUltraSecureJWTSecretKey!1234567890"))
+                            Encoding.UTF8.GetBytes(jwtSettings["Key"]))
                     };
                 });
             builder.Services.AddScoped<INotificationService, NotificationService>();
@@ -98,6 +97,8 @@ namespace Sparsha_backend
             app.UseStaticFiles();
             app.MapControllers();
             app.MapHub<NotificationHub>("/hub/notification");
+            var port = Environment.GetEnvironmentVariable("PORT") ?? "5000";
+            app.Urls.Add($"http://0.0.0.0:{port}");
 
             app.Run();
         }
